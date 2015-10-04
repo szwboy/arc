@@ -19,9 +19,6 @@ public class ConfigParserDelegate{
 	
 	private static final String IMPORT_ELEMENT="import";
 	private static final String COMPONENT_ELEMENT="component";
-	private static final String SERVICE_ELEMENT="service";
-	private static final String REPOSITORY_ELEMENT="repository";
-	private static final String ENTITY_ELEMENT="entity";
 	private static final String CONST_ELEMENT="const";
 	private static final String DEFAULT_SPLIT=",;";
 
