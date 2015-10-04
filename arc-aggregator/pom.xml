@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>arc</groupId>
-  <artifactId>aggregator</artifactId>
+  <artifactId>arc-aggregator</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>arc-aggregator</name>
@@ -12,6 +12,7 @@
     <module>../arc-common</module>    
     <module>../arc-container</module>
     <module>../arc-annotation</module>
+    <module>../arc-core</module>
   </modules>
 
   <dependencies>
