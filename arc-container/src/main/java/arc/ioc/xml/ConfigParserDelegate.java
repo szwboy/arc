@@ -40,10 +40,10 @@ public class ConfigParserDelegate{
 			
 		}else if(isNodeEquals(COMPONENT_ELEMENT,e)){
 			config=parseBeanConfig(e);
-			readerContext.getLoader().factory(config);
+//			readerContext.getLoader().factory(config);
 		}else if(isNodeEquals(CONST_ELEMENT,e)){
 			config=parseConstConfig(e);
-			readerContext.getLoader().constant(config);
+//			readerContext.getLoader().constant(config);
 		}
 	}
 	

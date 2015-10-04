@@ -8,22 +8,12 @@
   <name>arc-container</name>
   <url>http://maven.apache.org</url>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
   <dependencies>
     <dependency>  
        <groupId>arc</groupId>  
-       <artifactId>arc-common</artifactId>  
+       <artifactId>arc-core</artifactId>  
        <version>0.0.1-SNAPSHOT</version>  
        <type>jar</type>  
-    </dependency>
-    
-    <dependency>  
-       <groupId>org.ow2.asm</groupId>  
-       <artifactId>asm</artifactId>  
-       <version>5.0.4</version>  
     </dependency>
     
     <dependency> 

@@ -3,6 +3,7 @@ package arc.core.classreading;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,5 +68,32 @@ public final class AnnotationMetadataReadingVisitor extends ClassMetadataReading
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		return attributes.get(annotationType);
 	}
+	
+	@Override
+	public boolean hasAnnotatedMethod(String annotationType) {
+		return methodMetadatas.contains(annotationType);
+	}
+
+	@Override
+	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
+		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>(4);
+		for (MethodMetadata methodMetadata : this.methodMetadatas) {
+			if (methodMetadata.isAnnotated(annotationType)) {
+				annotatedMethods.add(methodMetadata);
+			}
+		}
+		return annotatedMethods;
+	}
+	
+	@Override
+	public Set<String> getAnnotations() {
+		return attributes.keySet();
+	}
+
+	@Override
+	public boolean isAnnotated(String annotationType) {
+		return attributes.containsKey(annotationType);
+	}
+
 	
 }

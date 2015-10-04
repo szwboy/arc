@@ -1,5 +1,7 @@
 package arc.ioc.xml;
 
+import arc.ioc.container.ContainerLoader;
+
 
 public class ReaderContext {
 
@@ -7,7 +9,7 @@ public class ReaderContext {
 	private ConfigReader reader;
 	private ContainerLoader loader;
 	
-	public ReaderContext(NamespaceHandlerResolver handlerResolver, IConfigReader reader,ContainerLoader loader) {
+	public ReaderContext(NamespaceHandlerResolver handlerResolver, ConfigReader reader,ContainerLoader loader) {
 		this.handlerResolver = handlerResolver;
 		this.reader = reader;
 		this.loader=loader;
@@ -17,7 +19,7 @@ public class ReaderContext {
 		return handlerResolver;
 	}
 	
-	public IConfigReader getReader() {
+	public ConfigReader getReader() {
 		return reader;
 	}
 	

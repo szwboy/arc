@@ -46,7 +46,7 @@ public class XmlConfigReader implements ConfigReader {
 		
 	};
 	
-	public ConfigReader(String... pathes) throws Exception{
+	public XmlConfigReader(String... pathes) throws Exception{
 		loadDefinition(pathes);
 	}
 	
@@ -97,15 +97,8 @@ public class XmlConfigReader implements ConfigReader {
 	}
 	
 	protected ReaderContext createReaderContext(){
-		return new ReaderContext(resolver,this,this);
-	}
-	
-	public void setEntityResolver(EntityResolver entityResolver) {
-		((EntityResolverWrapper)this.entityResolver).setResolver(entityResolver);
-	}
-
-	public void setErrorHandler(ErrorHandler errorHandler) {
-		((ErrorHandlerWrapper)this.errorHandler).setHandler(errorHandler);
+		return null;
+				//new ReaderContext(resolver,this,this);
 	}
 	
 }

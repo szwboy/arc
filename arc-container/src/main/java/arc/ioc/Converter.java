@@ -1,7 +1,8 @@
 package arc.ioc;
 
-import arc.annotation.annotation.Adaptive;
-import arc.annotation.annotation.Spi;
+import arc.core.spi.annotation.Adaptive;
+import arc.core.spi.annotation.Spi;
+
 
 @Spi
 public interface Converter {

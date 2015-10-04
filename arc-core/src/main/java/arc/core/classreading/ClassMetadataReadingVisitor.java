@@ -6,11 +6,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 
-import arc.common.utils.ReflectUtils;
+import arc.core.util.ReflectUtils;
 
 public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata{
 	private String className;//name of class
@@ -114,30 +113,4 @@ public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMe
 		return memberClasses.toArray(new String[0]);
 	}
 	
-	@Override
-	public boolean hasAnnotatedMethod(String annotationType) {
-		return methodMetadatas.contains(annotationType);
-	}
-
-	@Override
-	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
-		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>(4);
-		for (MethodMetadata methodMetadata : this.methodMetadatas) {
-			if (methodMetadata.isAnnotated(annotationType)) {
-				annotatedMethods.add(methodMetadata);
-			}
-		}
-		return annotatedMethods;
-	}
-	
-	@Override
-	public Set<String> getAnnotations() {
-		return attributes.keySet();
-	}
-
-	@Override
-	public boolean isAnnotated(String annotationType) {
-		return attributes.containsKey(annotationType);
-	}
-
 }

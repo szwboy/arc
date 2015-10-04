@@ -1,8 +1,10 @@
 package arc.ioc;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import arc.annotation.annotation.Inject;
-import arc.annotation.annotation.Value;
+
+import arc.ioc.container.annotation.Inject;
+import arc.ioc.container.annotation.Value;
+
 import java.util.Map;
 
 public class MapConverter implements Converter {

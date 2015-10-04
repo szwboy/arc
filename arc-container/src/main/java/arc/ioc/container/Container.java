@@ -13,16 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import javassist.NotFoundException;
-
 import org.apache.commons.lang.StringUtils;
+import arc.ioc.container.annotation.Inject;
+import arc.ioc.container.annotation.Qualifier;
+import arc.ioc.container.annotation.Value;
+import arc.core.cache.ReferenceCache;
+import arc.core.util.ReflectUtils;
 
-import arc.annotation.annotation.Inject;
-import arc.annotation.annotation.Qualifier;
-import arc.annotation.annotation.Value;
-import arc.common.utils.ReflectUtils;
-import arc.ioc.cache.ReferenceCache;
 
 public class Container {
 	

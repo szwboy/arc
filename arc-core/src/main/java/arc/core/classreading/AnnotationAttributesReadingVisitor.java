@@ -15,7 +15,7 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-import arc.common.utils.ReflectUtils;
+import arc.core.util.ReflectUtils;
 
 class RecursiveAnnotationVisitor extends AnnotationVisitor {
 

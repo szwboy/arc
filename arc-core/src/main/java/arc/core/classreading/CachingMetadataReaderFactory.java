@@ -8,9 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import arc.core.classreading.test.B;
-import arc.core.classreading.test.B.C;
 import arc.core.io.PathMatchingResourcePatternResolver;
 import arc.core.io.ResourceLoader;
 
@@ -56,17 +53,6 @@ public class CachingMetadataReaderFactory implements MetadataReaderFactory {
 	public MetadataReader getMetadataReader(String className) {
 		URL url= resourceLoader.getResource(className.replace(".", "/")+".class");
 		return getMetadataReader(url);
-	}
-	
-	public static void main(String[] args){
-		MetadataReaderFactory readerFactory= new CachingMetadataReaderFactory(new PathMatchingResourcePatternResolver());
-		MetadataReader reader= readerFactory.getMetadataReader(B.class.getName());
-		AnnotationMetadata metadata= reader.getAnnotationMetada();
-		Set<String> annotations= metadata.getAnnotations();
-		
-		for(String annotation: annotations){
-			System.out.println(annotation);
-		}
 	}
 
 }
