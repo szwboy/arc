@@ -11,8 +11,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import arc.core.classreading.test.B;
 import arc.core.classreading.test.B.C;
-import arc.ioc.io.PathMatchingResourcePatternResolver;
-import arc.ioc.io.ResourceLoader;
+import arc.core.io.PathMatchingResourcePatternResolver;
+import arc.core.io.ResourceLoader;
 
 public class CachingMetadataReaderFactory implements MetadataReaderFactory {
 	private ReadWriteLock rwl= new ReentrantReadWriteLock();

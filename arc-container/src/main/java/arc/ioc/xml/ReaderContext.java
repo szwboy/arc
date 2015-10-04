@@ -1,13 +1,10 @@
-package arc.core.xml;
-
-import arc.ioc.container.ContainerLoader;
-
+package arc.ioc.xml;
 
 
 public class ReaderContext {
 
 	private NamespaceHandlerResolver handlerResolver;
-	private IConfigReader reader;
+	private ConfigReader reader;
 	private ContainerLoader loader;
 	
 	public ReaderContext(NamespaceHandlerResolver handlerResolver, IConfigReader reader,ContainerLoader loader) {

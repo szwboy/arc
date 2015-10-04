@@ -1,7 +1,4 @@
-package arc.core.xml;
-
-import java.lang.reflect.Method;
-import java.util.Set;
+package arc.ioc.xml;
 
 import org.apache.commons.lang.ClassUtils;
 
@@ -13,7 +10,6 @@ public class Configuration {
 	private String parent;
 	private boolean isAbstract;
 	private String scope;
-	private Set<MethodOverride> methodOverrides;
 	private Object value;
 	private String initMethod;
 	
@@ -88,24 +84,6 @@ public class Configuration {
 
 	public void setScope(String scope) {
 		this.scope = scope;
-	}
-	
-	public Set<MethodOverride> getMethodOverrides() {
-		return methodOverrides;
-	}
-
-	public void setMethodOverrides(Set<MethodOverride> methodOverrides) {
-		this.methodOverrides = methodOverrides;
-	}
-	
-	public MethodOverride getMethodOverride(Method method){
-		for(MethodOverride methodOverride:methodOverrides){
-			if(methodOverride.getMethod().equals(method.getName())){
-				return methodOverride;
-			}
-		}
-		
-		return null;
 	}
 
 }

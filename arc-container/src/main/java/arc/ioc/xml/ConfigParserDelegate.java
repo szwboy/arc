@@ -1,6 +1,7 @@
-package arc.core.xml;
+package arc.ioc.xml;
 
 import java.util.StringTokenizer;
+
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -17,7 +18,10 @@ public class ConfigParserDelegate{
 	private ReaderContext readerContext;
 	
 	private static final String IMPORT_ELEMENT="import";
-	private static final String BEAN_ELEMENT="bean";
+	private static final String COMPONENT_ELEMENT="component";
+	private static final String SERVICE_ELEMENT="service";
+	private static final String REPOSITORY_ELEMENT="repository";
+	private static final String ENTITY_ELEMENT="entity";
 	private static final String CONST_ELEMENT="const";
 	private static final String DEFAULT_SPLIT=",;";
 
@@ -34,7 +38,7 @@ public class ConfigParserDelegate{
 				
 			}
 			
-		}else if(isNodeEquals(BEAN_ELEMENT,e)){
+		}else if(isNodeEquals(COMPONENT_ELEMENT,e)){
 			config=parseBeanConfig(e);
 			readerContext.getLoader().factory(config);
 		}else if(isNodeEquals(CONST_ELEMENT,e)){
@@ -43,7 +47,7 @@ public class ConfigParserDelegate{
 		}
 	}
 	
-	private Configuration parseConstConfig(Element e){
+	private Configuration parseConstConfig(Element e) throws ClassNotFoundException{
 		
 		String clazz=e.getAttribute("class");
 		Configuration config=new Configuration(clazz);
@@ -54,7 +58,7 @@ public class ConfigParserDelegate{
 		}
 		
 		String value=e.getAttribute("value");
-		if(!StringUtils.isBlank(value)){
+		if(StringUtils.isNotBlank(value)){
 			config.setValue(value);
 		}
 		

@@ -1,4 +1,4 @@
-package arc.ioc.io;
+package arc.core.io;
 
 import java.util.regex.Pattern;
 

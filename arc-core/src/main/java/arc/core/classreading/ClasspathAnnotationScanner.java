@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 
-import arc.ioc.io.PathMatchingResourcePatternResolver;
-import arc.ioc.io.ResourcePatternResolver;
+import arc.core.io.PathMatchingResourcePatternResolver;
+import arc.core.io.ResourcePatternResolver;
 
 public class ClasspathAnnotationScanner {
 	private String[] basePackages;

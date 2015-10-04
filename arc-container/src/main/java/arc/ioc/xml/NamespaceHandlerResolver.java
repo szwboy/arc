@@ -1,4 +1,4 @@
-package arc.core.xml;
+package arc.ioc.xml;
 
 public interface NamespaceHandlerResolver {
 

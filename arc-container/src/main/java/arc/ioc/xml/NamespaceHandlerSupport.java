@@ -1,4 +1,4 @@
-package arc.core.xml;
+package arc.ioc.xml;
 
 import java.util.HashMap;
 import java.util.Map;

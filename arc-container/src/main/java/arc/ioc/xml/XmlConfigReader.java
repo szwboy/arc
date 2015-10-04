@@ -1,4 +1,4 @@
-package arc.core.xml;
+package arc.ioc.xml;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,16 +15,17 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 
-public class ConfigReader implements IConfigReader {
+public class XmlConfigReader implements ConfigReader {
 	
-	private Logger logger=Logger.getLogger("com.szw.xml.DefinitionReader");
+	private Logger logger=Logger.getLogger(XmlConfigReader.class);
 	
 	private DocumentLoader documentLoader=new DefaultDocumentLoader();
 	private NamespaceHandlerResolver resolver=new DefaultNamespaceHandlerResolver();
 	
 	private ConfigParserDelegate parser;
 	
-	private EntityResolver entityResolver=new EntityResolverWrapper(new SchemaEntityResolver());
+	//entity resolver to detect xml schema information such as where the schema information is 
+	private EntityResolver entityResolver=new SchemaEntityResolver();
 	private ErrorHandler errorHandler=new ErrorHandler(){
 
 		@Override

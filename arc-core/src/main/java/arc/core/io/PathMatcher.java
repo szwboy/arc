@@ -1,4 +1,4 @@
-package arc.ioc.io;
+package arc.core.io;
 
 public interface PathMatcher {
 	

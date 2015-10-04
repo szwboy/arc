@@ -3,8 +3,10 @@ package arc.core.classreading;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+
 import org.objectweb.asm.ClassReader;
-import arc.ioc.io.ResourceLoader;
+
+import arc.core.io.ResourceLoader;
 
 public class DefaultMetadataReader implements MetadataReader {
 
