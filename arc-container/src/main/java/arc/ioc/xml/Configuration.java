@@ -3,35 +3,13 @@ package arc.ioc.xml;
 import org.apache.commons.lang.ClassUtils;
 
 public class Configuration {
-	
-	private Class<?> clazz;
-	private String name;
+	private String id;
 	private Class<?> type;
-	private String parent;
-	private boolean isAbstract;
 	private String scope;
 	private Object value;
-	private String initMethod;
-	
-	
-	public String getInitMethod() {
-		return initMethod;
-	}
-
-	public void setInitMethod(String initMethod) {
-		this.initMethod = initMethod;
-	}
 
 	public Configuration(String className) throws ClassNotFoundException {
-		this.clazz=ClassUtils.getClass(className);
-	}
-	
-	public Class<?> getClazz() {
-		return clazz;
-	}
-
-	public void setClazz(Class<?> clazz) {
-		this.clazz = clazz;
+		this.type=ClassUtils.getClass(className);
 	}
 
 	public Object getValue() {
@@ -43,11 +21,11 @@ public class Configuration {
 	}
 
 	public String getName() {
-		return name;
+		return id;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String id) {
+		this.id = id;
 	}
 
 	public Class<?> getType() {
@@ -60,22 +38,6 @@ public class Configuration {
 	
 	public void setType(Class<?> type){
 		this.type=type;
-	}
-
-	public String getParent() {
-		return parent;
-	}
-
-	public void setParent(String parent) {
-		this.parent = parent;
-	}
-
-	public boolean isAbstract() {
-		return isAbstract;
-	}
-
-	public void setAbstract(boolean isAbstract) {
-		this.isAbstract = isAbstract;
 	}
 	
 	public String getScope() {

@@ -13,7 +13,7 @@ import org.w3c.dom.NodeList;
  *
  */
 public class ConfigParserDelegate{
-	private final static String DEFAULT_NAMESPACE_URI="http://www.arc.com/schema/beans";
+	private final static String DEFAULT_NAMESPACE_URI="http://www.arc.com/schema/components";
 	
 	private ReaderContext readerContext;
 	

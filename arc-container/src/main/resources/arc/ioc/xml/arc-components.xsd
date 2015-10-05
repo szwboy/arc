@@ -56,7 +56,7 @@
 	</xsd:element>
 	
 	<xsd:attributeGroup name="componentAttributes">
-		<xsd:attribute name="name" type="xsd:string">
+		<xsd:attribute name="value" type="xsd:string">
 		</xsd:attribute>
 		<xsd:attribute name="class" type="xsd:string">
 		</xsd:attribute>
@@ -64,3 +64,4 @@
 		</xsd:attribute>
 		<xsd:anyAttribute namespace="##other" processContents="lax"/>
 	</xsd:attributeGroup>
+</xsd:schema>	

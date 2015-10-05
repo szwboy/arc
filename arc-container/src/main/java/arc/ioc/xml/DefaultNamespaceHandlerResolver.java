@@ -29,9 +29,14 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 
 			try {
 				handler= (NamespaceHandler) ClassUtils.getClass(handlerClassName).newInstance();
-			} catch (InstantiationException | IllegalAccessException
-					| ClassNotFoundException e) {
+			} catch (InstantiationException e) {
 				throw new IllegalArgumentException("cannot find corresponding handler["+nameSpaceUri+"]");
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			handler.init();
 			handlers.put(nameSpaceUri, handler);

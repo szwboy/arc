@@ -14,7 +14,6 @@
   
   <modules>     
     <module>../arc-container</module>
-    <module>../arc-annotation</module>
     <module>../arc-core</module>
   </modules>
 
@@ -41,11 +40,18 @@
   
   
   <build>
+  	<testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
   	<resources>
       <resource>
         <directory>${project.basedir}/src/main/resources</directory>
       </resource>
    </resources>
+   
+   <testResources>
+      <testResource>
+        <directory>${project.basedir}/src/test/resources</directory>
+      </testResource>
+   </testResources>
    
    <plugins>
         <plugin>

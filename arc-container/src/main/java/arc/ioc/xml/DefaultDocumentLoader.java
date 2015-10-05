@@ -3,7 +3,6 @@ package arc.ioc.xml;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
@@ -20,6 +19,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	
 	private DocumentBuilderFactory createBuilderFactory(){
 		DocumentBuilderFactory builderFactory=DocumentBuilderFactory.newInstance();
+		builderFactory.setValidating(true);
 		builderFactory.setNamespaceAware(true);
 		builderFactory.setAttribute(SCHEMA_LANGUAGE_ATTR,XSD_SCHEMA_LANGUAGE);
 		
