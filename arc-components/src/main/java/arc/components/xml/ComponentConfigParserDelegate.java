@@ -37,7 +37,7 @@ public class ComponentConfigParserDelegate{
 			
 		}else if(isNodeEquals(COMPONENT_ELEMENT,e)){
 			component=parseBeanConfig(e);
-//			readerContext.getLoader().factory(config);
+			readerContext.getRegistry().factory(config);
 		}else if(isNodeEquals(CONST_ELEMENT,e)){
 			component=parseConstConfig(e);
 //			readerContext.getLoader().constant(config);

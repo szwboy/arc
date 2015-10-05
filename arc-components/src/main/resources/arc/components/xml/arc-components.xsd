@@ -55,6 +55,9 @@
 		</xsd:complexType>
 	</xsd:element>
 	
+	<xsd:element name="constant" type="identifiedType">
+	</xsd:element>
+	
 	<xsd:attributeGroup name="componentAttributes">
 		<xsd:attribute name="value" type="xsd:string">
 		</xsd:attribute>

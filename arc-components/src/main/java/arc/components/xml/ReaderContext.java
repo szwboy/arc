@@ -23,7 +23,7 @@ public class ReaderContext {
 		return reader;
 	}
 	
-	public ComponentRegistry getLoader(){
+	public ComponentRegistry getRegistry(){
 		return registry;
 	}
 	

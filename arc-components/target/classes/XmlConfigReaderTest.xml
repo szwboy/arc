@@ -4,4 +4,5 @@
 	xsi:schemaLocation="http://www.arc.com/schema/components http://www.arc.com/schema/components/arc-components.xsd">
 	
 	<component id="name" class="arc.sample.A" scope="single"></component>
+	<consant id="value">123</consant>
 </components>

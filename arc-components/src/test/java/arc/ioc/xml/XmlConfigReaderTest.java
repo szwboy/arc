@@ -8,7 +8,7 @@ public class XmlConfigReaderTest extends TestCase {
 
 	public void testLoadDefinitions(){
 		try {
-			ComponentReader reader= new XmlComponentReader("/arc/ioc/xml/XmlConfigReaderTest.xml");
+			ComponentReader reader= new XmlComponentReader("/arc/components/xml/XmlConfigReaderTest.xml");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
