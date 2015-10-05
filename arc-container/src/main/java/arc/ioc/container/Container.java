@@ -22,7 +22,7 @@ import arc.core.cache.ReferenceCache;
 import arc.core.util.ReflectUtils;
 
 
-public class Container {
+public class Container{
 	
 	@SuppressWarnings("rawtypes")
 	private Map<Key, InternalFactory> factories;
@@ -300,36 +300,6 @@ public class Container {
 		void inject(InternalContext context, Object instance);
 	}
 	
-	private <T>T getInstance(String name, Class<T> type, InternalContext context){
-		Key<T> key= Key.newInstance(type, name);
-		InternalFactory<T> factory= factories.get(key);
-		ExternalContext<?> previous= context.getExternalContext();
-		try{
-			
-			ExternalContext<T> currentContext= new ExternalContext<T>(this, key);
-			context.setExternalContext(currentContext);
-			return factory== null? null: factory.create(context);
-		}finally{
-			context.setExternalContext(previous);
-		}
-	}
-	
-	public <T>T getInstance(final String name, final Class<T> type){
-		return callInContext(new ContextualCallable<T>(){
-
-			@Override
-			public T call(InternalContext context) {
-				InternalFactory<T> factory= Container.this.factories.get(Key.newInstance(type, name));
-				return getInstance(name, type, context);
-			}
-			
-		});
-	}
-	
-	public <T>T getInstance(Class<T> type){
-		return getInstance("default", type);
-	}
-	
 	<T>T callInContext(ContextualCallable<T> callable){
 		InternalContext[] reference= localContext.get();
 		try{
@@ -347,6 +317,40 @@ public class Container {
 	static interface ContextualCallable<T>{
 		
 		T call(InternalContext context);
+	}
+	
+	private <T>T getComponent(String name, Class<T> type, InternalContext context){
+		Key<T> key= Key.newInstance(type, name);
+		InternalFactory<T> factory= factories.get(key);
+		ExternalContext<?> previous= context.getExternalContext();
+		try{
+			
+			ExternalContext<T> currentContext= new ExternalContext<T>(this, key);
+			context.setExternalContext(currentContext);
+			return factory== null? null: factory.create(context);
+		}finally{
+			context.setExternalContext(previous);
+		}
+	}
+	
+	public <T>T getComponent(final String name, final Class<T> type){
+		return callInContext(new ContextualCallable<T>(){
+
+			@Override
+			public T call(InternalContext context) {
+				InternalFactory<T> factory= Container.this.factories.get(Key.newInstance(type, name));
+				return getComponent(name, type, context);
+			}
+			
+		});
+	}
+	
+	public <T>T getComponent(Class<T> type){
+		return getComponent("default", type);
+	}
+	
+	public Object getComponent(String name){
+		return null;
 	}
 	
 }

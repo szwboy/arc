@@ -1,31 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>arc-container</artifactId>
+
+  <groupId>arc</groupId>
+  <artifactId>arc-components</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>arc-container</name>
+  <name>arc-components</name>
 
   <dependencies>
-    <dependency>  
+    <dependency>
        <groupId>arc</groupId>  
        <artifactId>arc-core</artifactId>  
        <version>0.0.1-SNAPSHOT</version>  
-       <type>jar</type>  
+       <type>jar</type>  	
     </dependency>
-    
-    <dependency>  
-       <groupId>arc</groupId>  
-       <artifactId>arc-components</artifactId>  
-       <version>0.0.1-SNAPSHOT</version>  
-       <type>jar</type>  
-    </dependency>
-    
-    <dependency> 
-      <groupId>org.codehaus.jackson</groupId> 
-      <artifactId>jackson-mapper-asl</artifactId> 
-      <version>1.9.13</version> 
-   	</dependency>
   </dependencies>
   
   <parent>  
@@ -34,5 +23,4 @@
     <version>0.0.1-SNAPSHOT</version>  
     <relativePath>../arc-aggregator</relativePath>  
   </parent>
-  
 </project>

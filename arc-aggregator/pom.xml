@@ -15,6 +15,7 @@
   <modules>     
     <module>../arc-container</module>
     <module>../arc-core</module>
+    <module>../arc-components</module>
   </modules>
 
   <dependencies>
