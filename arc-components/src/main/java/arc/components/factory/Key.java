@@ -1,4 +1,4 @@
-package arc.ioc.container;
+package arc.components.factory;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -41,6 +41,6 @@ public class Key<T> {
 	}
 	
 	public String toString(){
-		return "[type is "+type+"name is "+name+"]";
+		return "[type is "+type+",name is "+name+"]";
 	}
 }

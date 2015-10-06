@@ -1,4 +1,5 @@
-package arc.ioc.container;
+package arc.components.factory;
+
 
 public class InternalContext {
 

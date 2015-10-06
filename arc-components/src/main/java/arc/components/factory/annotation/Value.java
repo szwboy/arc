@@ -1,4 +1,4 @@
-package arc.ioc.container.annotation;
+package arc.components.factory.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

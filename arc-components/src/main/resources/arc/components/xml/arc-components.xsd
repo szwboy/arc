@@ -16,6 +16,7 @@
 					<xsd:element ref="import"/>
 					<xsd:element ref="alias"/>
 					<xsd:element ref="component"/>
+					<xsd:element ref="constant"/>
 					<xsd:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="unbounded"/>
 				</xsd:choice>
 				<xsd:element ref="components" minOccurs="0" maxOccurs="unbounded"/>
@@ -55,13 +56,21 @@
 		</xsd:complexType>
 	</xsd:element>
 	
-	<xsd:element name="constant" type="identifiedType">
+	<xsd:element name="constant">
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="identifiedType">
+					<xsd:attribute name="value" type="xsd:string" use="required">
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
 	</xsd:element>
 	
 	<xsd:attributeGroup name="componentAttributes">
-		<xsd:attribute name="value" type="xsd:string">
+		<xsd:attribute name="class" type="xsd:string" use="required">
 		</xsd:attribute>
-		<xsd:attribute name="class" type="xsd:string">
+		<xsd:attribute name="impl" type="xsd:string">
 		</xsd:attribute>
 		<xsd:attribute name="scope" type="xsd:string">
 		</xsd:attribute>

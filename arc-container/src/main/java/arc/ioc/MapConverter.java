@@ -2,8 +2,8 @@ package arc.ioc;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import arc.ioc.container.annotation.Inject;
-import arc.ioc.container.annotation.Value;
+import arc.components.factory.annotation.Inject;
+import arc.components.factory.annotation.Value;
 
 import java.util.Map;
 

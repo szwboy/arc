@@ -1,4 +1,8 @@
-package arc.ioc.container;
+package arc.components.support;
+
+import arc.components.factory.InternalContext;
+import arc.components.factory.InternalFactory;
+import arc.components.factory.Key;
 
 public enum Scope {
 	Default{

@@ -11,5 +11,5 @@ public interface DocumentLoader {
 	String SCHEMA_LANGUAGE_ATTR="http://java.sun.com/xml/jaxp/properties/schemaLanguage";
 	String XSD_SCHEMA_LANGUAGE=XMLConstants.W3C_XML_SCHEMA_NS_URI;
 
-	public Document loadDocument(InputSource inputSource,EntityResolver resolver, ErrorHandler handler) throws Exception;
+	public Document loadDocument(InputSource inputSource,EntityResolver resolver, ErrorHandler handler);
 }

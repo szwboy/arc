@@ -2,14 +2,38 @@ package arc.components.xml;
 
 import org.apache.commons.lang.ClassUtils;
 
-public class Component {
+public class Component<T> {
 	private String id;
-	private Class<?> type;
+	private Class<T> type;
+	private Class<? extends T> impl;
 	private String scope;
 	private Object value;
 
-	public Component(String className) throws ClassNotFoundException {
-		this.type=ClassUtils.getClass(className);
+	public Component(Class<T> type){
+		this.type=type;
+	}
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public Class<?> getImpl() {
+		return impl;
+	}
+
+	@SuppressWarnings("unchecked")
+	public void setImpl(String impl){
+		
+		try {
+			this.impl = ClassUtils.getClass(impl);
+		} catch (ClassNotFoundException e) {
+			
+		}
+		if(type.isAssignableFrom(this.impl)) throw new IllegalArgumentException(impl +" should be the subclass of "+type.getCanonicalName());
 	}
 
 	public Object getValue() {
@@ -20,24 +44,8 @@ public class Component {
 		this.value = value;
 	}
 
-	public String getName() {
-		return id;
-	}
-
-	public void setName(String id) {
-		this.id = id;
-	}
-
 	public Class<?> getType() {
 		return type;
-	}
-
-	public void setType(String type) throws ClassNotFoundException {
-		this.type = ClassUtils.getClass(type);
-	}
-	
-	public void setType(Class<?> type){
-		this.type=type;
 	}
 	
 	public String getScope() {

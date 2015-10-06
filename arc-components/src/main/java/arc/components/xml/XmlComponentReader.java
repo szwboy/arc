@@ -10,15 +10,18 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import arc.components.support.ComponentRegistry;
+
 
 public class XmlComponentReader implements ComponentReader {
 	
 	private Logger logger=Logger.getLogger(XmlComponentReader.class);
-	
+
 	private DocumentLoader documentLoader=new DefaultDocumentLoader();
 	private NamespaceHandlerResolver resolver=new DefaultNamespaceHandlerResolver();
 	
 	private ComponentConfigParserDelegate parser;
+	private ComponentRegistry registry;
 	
 	//entity resolver to detect xml schema information such as where the schema information is 
 	private EntityResolver entityResolver=new SchemaEntityResolver();
@@ -42,12 +45,16 @@ public class XmlComponentReader implements ComponentReader {
 		
 	};
 	
-	public XmlComponentReader(String... pathes) throws Exception{
-		loadDefinition(pathes);
+	public XmlComponentReader(ComponentRegistry registry) throws Exception{
+		this.registry= registry;
+	}
+	
+	public void setRegistry(ComponentRegistry registry) {
+		this.registry = registry;
 	}
 	
 	@Override
-	public void loadDefinition(String... pathes) throws Exception {
+	public void loadDefinition(String... pathes){
 		for(String path:pathes){
 			Document doc=loadDocument(path);
 			doLoadDefinition(doc.getDocumentElement());
@@ -78,7 +85,7 @@ public class XmlComponentReader implements ComponentReader {
 		return errorHandler;
 	}
 	
-	protected Document loadDocument(String path) throws Exception{
+	protected Document loadDocument(String path){
 		InputStream inputStream=getClass().getResourceAsStream(path);
 		InputSource inputSource=new InputSource(inputStream);
 		return documentLoader.loadDocument(inputSource, entityResolver, errorHandler);
@@ -86,15 +93,11 @@ public class XmlComponentReader implements ComponentReader {
 
 	protected void doLoadDefinition(Element root){
 		parser=new ComponentConfigParserDelegate(createReaderContext());
-		try {
-			parser.parseConfig(root);
-		} catch (Exception e) {
-		}
+		parser.parseConfig(root);
 	}
 	
 	protected ReaderContext createReaderContext(){
-		return null;
-				//new ReaderContext(resolver,this,this);
+		return new ReaderContext(resolver, this, registry);
 	}
 	
 }

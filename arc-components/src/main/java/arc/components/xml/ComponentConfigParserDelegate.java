@@ -2,7 +2,9 @@ package arc.components.xml;
 
 import java.util.StringTokenizer;
 
+import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -17,13 +19,21 @@ public class ComponentConfigParserDelegate{
 	
 	private ReaderContext readerContext;
 	
-	private static final String IMPORT_ELEMENT="import";
-	private static final String COMPONENT_ELEMENT="component";
-	private static final String CONST_ELEMENT="const";
-	private static final String DEFAULT_SPLIT=",;";
+	public static final String IMPORT_ELEMENT="import";
+	public static final String COMPONENT_ELEMENT="component";
+	public static final String CONST_ELEMENT="const";
+	public static final String DEFAULT_SPLIT=",;";
+	
+	public static final String CLASS_ATTRIBUTE="class";
+	public static final String IMPL_ATTRIBUTE="impl";
+	public static final String SCOPE_ATTRIBUTE="scope";
+	public static final String ID_ATTRIBUTE="id";
+	public static final String VALUE_ATTRIBUTE="value";
+	
+	private static final Logger log= Logger.getLogger(ComponentConfigParserDelegate.class);
 
-	private void parse(Element e) throws Exception {
-		Component component;
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void parse(Element e){
 		if(isNodeEquals(IMPORT_ELEMENT,e)){
 			String resourcePaths=e.getAttribute("resource");
 			StringTokenizer stringTokenizer=new StringTokenizer(resourcePaths,DEFAULT_SPLIT);
@@ -36,47 +46,61 @@ public class ComponentConfigParserDelegate{
 			}
 			
 		}else if(isNodeEquals(COMPONENT_ELEMENT,e)){
-			component=parseBeanConfig(e);
-			readerContext.getRegistry().factory(config);
+			String type=e.getAttribute("class");
+			try {
+				Component component = parseComponent(e, ClassUtils.getClass(type));
+				readerContext.getRegistry().factory(component.getId(), component.getType(), component.getImpl());
+			} catch (ClassNotFoundException e1) {
+				log.error(e);
+			}
 		}else if(isNodeEquals(CONST_ELEMENT,e)){
-			component=parseConstConfig(e);
+			Component<?> component=parseConst(e);
 //			readerContext.getLoader().constant(config);
 		}
 	}
 	
-	private Component parseConstConfig(Element e) throws ClassNotFoundException{
+	private <T>Component<T> parseConst(Element e){
 		
-		String clazz=e.getAttribute("class");
-		Component config=new Component(clazz);
+//		String clazz=e.getAttribute("class");
+//		Component<T> config= new Component<T>(clazz);
+//		
+//		String id= e.getAttribute("id");
+//		if(StringUtils.isNotBlank(id)){
+//			config.setId(id);
+//		}
+//		
+//		String impl= e.getAttribute("impl");
+//		if(StringUtils.isNotBlank(impl)){
+//			config.setImpl(impl);
+//		}
+//		
+//		String scope= e.getAttribute("scope");
+//		if(StringUtils.isNotBlank(scope)){
+//			config.setImpl(scope);
+//		}
 		
-		String name=e.getAttribute("name");
-		if(!StringUtils.isBlank(name)){
-			config.setName(name);
-		}
-		
-		String value=e.getAttribute("value");
-		if(StringUtils.isNotBlank(value)){
-			config.setValue(value);
-		}
-		
-		return config;
+		return null;
 	}
 	
-	private Component parseBeanConfig(Element e) throws ClassNotFoundException{
-		String clazz=e.getAttribute("class");
-		Component config=new Component(clazz);
+	private <T>Component<T> parseComponent(Element e, Class<T> type){
+		Component<T> component= new Component<T>(type);
 		
-		String name=e.getAttribute("name");
-		if(!StringUtils.isBlank(name)){
-			config.setName(name);
+		String id= e.getAttribute("id");
+		if(StringUtils.isNotBlank(id)){
+			component.setId(id);
 		}
 		
-		String type=e.getAttribute("type");
-		if(!StringUtils.isBlank(type)){
-			config.setType(type);
+		String impl= e.getAttribute("impl");
+		if(StringUtils.isNotBlank(impl)){
+			component.setImpl(impl);
 		}
 		
-		return config;
+		String scope= e.getAttribute("scope");
+		if(StringUtils.isNotBlank(scope)){
+			component.setScope(scope);
+		}
+		
+		return component;
 	}
 	
 	public boolean isNodeEquals(String name,Element e){
@@ -87,7 +111,7 @@ public class ComponentConfigParserDelegate{
 		this.readerContext=readerContext;
 	}
 	
-	public void parseConfig(Element root) throws Exception {
+	public void parseConfig(Element root){
 		NamespaceHandler handler=null;
 		
 		if(isDefaultNamespace(root.getNamespaceURI())){

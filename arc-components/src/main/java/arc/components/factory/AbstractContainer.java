@@ -1,4 +1,4 @@
-package arc.ioc.container;
+package arc.components.factory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -6,53 +6,27 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ReflectPermission;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import javassist.NotFoundException;
 import org.apache.commons.lang.StringUtils;
-import arc.ioc.container.annotation.Inject;
-import arc.ioc.container.annotation.Qualifier;
-import arc.ioc.container.annotation.Value;
+import arc.components.factory.annotation.Inject;
+import arc.components.factory.annotation.Qualifier;
+import arc.components.factory.annotation.Value;
 import arc.core.cache.ReferenceCache;
 import arc.core.util.ReflectUtils;
 
+/**
+ * containing all components
+ * @author sunzhongwei
+ *
+ */
+abstract class AbstractContainer implements Container{
 
-public class Container{
-	
-	@SuppressWarnings("rawtypes")
-	private Map<Key, InternalFactory> factories;
-	@SuppressWarnings("rawtypes")
-	private Map<Class, Set<String>> factoriesByName;
-	
 	private ThreadLocal<InternalContext[]> localContext= new ThreadLocal<InternalContext[]>(){
 		InternalContext[] initialVlaue(){
 			return new InternalContext[1];
 		}
 	};
-	
-	@SuppressWarnings("rawtypes")
-	public Container(Map<Key, InternalFactory> factories){
-		this.factories= factories;
-		
-		Map<Class, Set<String>> map= new HashMap<Class, Set<String>>();
-		for(Entry<Key, InternalFactory> en: factories.entrySet()){
-			
-			Key key= en.getKey();
-			if(!map.containsKey(key.getType())){
-				Set<String> set= new HashSet<String>();
-				map.put(key.getType(), set);
-			}
-			
-			map.get(key.getType()).add(key.getName());
-		}
-		
-		factoriesByName= Collections.unmodifiableMap(map);
-	}
 	
 	@SuppressWarnings("rawtypes")
 	private ReferenceCache<Class,ConstructorInjector> constructors= new ReferenceCache<Class,ConstructorInjector>(){
@@ -132,7 +106,7 @@ public class Container{
 				
 				Key<?> key= Key.newInstance(pts[i], name);
 				ExternalContext<?> context= new ExternalContext(this, key);
-				parameterInjectors[i]= new ParameterInjector(context, factories.get(key));
+				parameterInjectors[i]= new ParameterInjector(context, getFactory(key));
 			}
 			
 		}
@@ -149,7 +123,7 @@ public class Container{
 		return parameters;
 	}
 	
-	class ConstructorInjector<T>{
+	public class ConstructorInjector<T>{
 		ParameterInjector<?>[] parameterInjectors;
 		Constructor<? extends T> constructor;
 		List<Injector> injectors;
@@ -246,7 +220,7 @@ public class Container{
 			
 			Key<?> key= Key.newInstance(f.getClass(), name);
 			this.externalContext= new ExternalContext(container, key); 
-			factory= container.factories.get(key);
+			factory= ((AbstractContainer)container).getFactory(key);
 		}
 		
 		public void inject(InternalContext context, Object instance){
@@ -300,7 +274,7 @@ public class Container{
 		void inject(InternalContext context, Object instance);
 	}
 	
-	<T>T callInContext(ContextualCallable<T> callable){
+	public <T>T callInContext(ContextualCallable<T> callable){
 		InternalContext[] reference= localContext.get();
 		try{
 			if(reference[0]==null){
@@ -314,14 +288,16 @@ public class Container{
 		}
 	}
 	
-	static interface ContextualCallable<T>{
+	public static interface ContextualCallable<T>{
 		
 		T call(InternalContext context);
 	}
 	
+	protected abstract <T>InternalFactory<T> getFactory(Key<T> key);
+	
 	private <T>T getComponent(String name, Class<T> type, InternalContext context){
 		Key<T> key= Key.newInstance(type, name);
-		InternalFactory<T> factory= factories.get(key);
+		InternalFactory<T> factory= getFactory(key);
 		ExternalContext<?> previous= context.getExternalContext();
 		try{
 			
@@ -338,7 +314,6 @@ public class Container{
 
 			@Override
 			public T call(InternalContext context) {
-				InternalFactory<T> factory= Container.this.factories.get(Key.newInstance(type, name));
 				return getComponent(name, type, context);
 			}
 			
@@ -347,10 +322,6 @@ public class Container{
 	
 	public <T>T getComponent(Class<T> type){
 		return getComponent("default", type);
-	}
-	
-	public Object getComponent(String name){
-		return null;
 	}
 	
 }
