@@ -3,17 +3,17 @@ package arc.components.factory;
 
 public class InternalContext {
 
-	private Container container;
+	private ComponentFactory componentFactory;
 	private ExternalContext<?> externalContext;
 	
-	public InternalContext(Container container) {
-		this.container = container;
+	public InternalContext(ComponentFactory componentFactory) {
+		this.componentFactory = componentFactory;
 	}
 
 	InternalContext(){}
 	
-	public Container getContainer() {
-		return container;
+	public ComponentFactory getComponentFactory() {
+		return componentFactory;
 	}
 
 	public ExternalContext<?> getExternalContext() {

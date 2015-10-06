@@ -1,4 +1,4 @@
-package arc.ioc;
+package arc.components.support;
 
 import arc.core.spi.annotation.Adaptive;
 import arc.core.spi.annotation.Spi;

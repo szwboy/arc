@@ -2,7 +2,7 @@ package arc.components.factory;
 
 import java.util.Set;
 
-public interface Container {
+public interface ComponentFactory {
 	/**
      * Default dependency name.
     */
@@ -29,4 +29,11 @@ public interface Container {
 	 * @return
 	 */
 	<T>Set<String> getComponentNames(Class<T> type);
+	
+	/**
+	 * instantiate a bean
+	 * @param type
+	 * @return
+	 */
+	<T> T inject(final Class<T> type);
 }

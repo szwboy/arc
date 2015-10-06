@@ -46,16 +46,15 @@ public class ComponentConfigParserDelegate{
 			}
 			
 		}else if(isNodeEquals(COMPONENT_ELEMENT,e)){
-			String type=e.getAttribute("class");
+			String impl=e.getAttribute("impl");
 			try {
-				Component component = parseComponent(e, ClassUtils.getClass(type));
-				readerContext.getRegistry().factory(component.getId(), component.getType(), component.getImpl());
+				Component component = parseComponent(e, ClassUtils.getClass(impl));
+				readerContext.getRegistry().factory(component.getId(), component.getImpl(), component.getScope());
 			} catch (ClassNotFoundException e1) {
 				log.error(e);
 			}
 		}else if(isNodeEquals(CONST_ELEMENT,e)){
 			Component<?> component=parseConst(e);
-//			readerContext.getLoader().constant(config);
 		}
 	}
 	
@@ -82,20 +81,15 @@ public class ComponentConfigParserDelegate{
 		return null;
 	}
 	
-	private <T>Component<T> parseComponent(Element e, Class<T> type){
-		Component<T> component= new Component<T>(type);
+	private <T>Component<T> parseComponent(Element e, Class<T> impl){
+		Component<T> component= new Component<T>(impl);
 		
-		String id= e.getAttribute("id");
+		String id= e.getAttribute(ID_ATTRIBUTE);
 		if(StringUtils.isNotBlank(id)){
 			component.setId(id);
 		}
 		
-		String impl= e.getAttribute("impl");
-		if(StringUtils.isNotBlank(impl)){
-			component.setImpl(impl);
-		}
-		
-		String scope= e.getAttribute("scope");
+		String scope= e.getAttribute(SCOPE_ATTRIBUTE);
 		if(StringUtils.isNotBlank(scope)){
 			component.setScope(scope);
 		}

@@ -1,16 +1,16 @@
 package arc.components.xml;
 
 import org.apache.commons.lang.ClassUtils;
+import arc.components.support.Scope;
 
 public class Component<T> {
-	private String id;
-	private Class<T> type;
-	private Class<? extends T> impl;
-	private String scope;
+	private Class<T> impl;
+	private Scope scope= Scope.Default;
 	private Object value;
-
-	public Component(Class<T> type){
-		this.type=type;
+	private String id;
+	
+	public Component(Class<T> impl){
+		this.impl= impl;
 	}
 	
 	public String getId() {
@@ -21,7 +21,7 @@ public class Component<T> {
 		this.id = id;
 	}
 
-	public Class<?> getImpl() {
+	public Class<? extends T> getImpl() {
 		return impl;
 	}
 
@@ -33,7 +33,6 @@ public class Component<T> {
 		} catch (ClassNotFoundException e) {
 			
 		}
-		if(type.isAssignableFrom(this.impl)) throw new IllegalArgumentException(impl +" should be the subclass of "+type.getCanonicalName());
 	}
 
 	public Object getValue() {
@@ -43,17 +42,20 @@ public class Component<T> {
 	public void setValue(Object value) {
 		this.value = value;
 	}
-
-	public Class<?> getType() {
-		return type;
-	}
 	
-	public String getScope() {
+	public Scope getScope() {
 		return scope;
 	}
 
 	public void setScope(String scope) {
-		this.scope = scope;
+		switch(scope){
+			case "singleton":
+				this.scope= Scope.Singleton;
+				break;
+			case "thread":
+				this.scope= Scope.Thread;
+				break;
+		}
 	}
 
 }

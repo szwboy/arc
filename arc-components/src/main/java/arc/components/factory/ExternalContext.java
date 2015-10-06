@@ -4,16 +4,16 @@ package arc.components.factory;
 
 public class ExternalContext<T> {
 
-	private Container container;
+	private ComponentFactory componentFactory;
 	private Key<T> key;
 	
-	public ExternalContext(Container container, Key<T> key) {
-		this.container = container;
+	public ExternalContext(ComponentFactory componentFactory, Key<T> key) {
+		this.componentFactory = componentFactory;
 		this.key = key;
 	}
 
-	public Container getContainer() {
-		return container;
+	public ComponentFactory getContainer() {
+		return componentFactory;
 	}
 
 	public Key<T> getKey() {

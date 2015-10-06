@@ -7,8 +7,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ReflectPermission;
 import java.util.ArrayList;
 import java.util.List;
+
 import javassist.NotFoundException;
+
 import org.apache.commons.lang.StringUtils;
+
 import arc.components.factory.annotation.Inject;
 import arc.components.factory.annotation.Qualifier;
 import arc.components.factory.annotation.Value;
@@ -20,8 +23,10 @@ import arc.core.util.ReflectUtils;
  * @author sunzhongwei
  *
  */
-abstract class AbstractContainer implements Container{
+abstract class AbstractComponentFactory implements ComponentFactory{
 
+
+	/*store internal context for current creating bean*/
 	private ThreadLocal<InternalContext[]> localContext= new ThreadLocal<InternalContext[]>(){
 		InternalContext[] initialVlaue(){
 			return new InternalContext[1];
@@ -151,7 +156,7 @@ abstract class AbstractContainer implements Container{
 			addInjectorsForMember(impl, injectors= new ArrayList<Injector>());
 		}
 		
-		T construct(InternalContext context, Class<T> type){
+		T construct(InternalContext context){
 			Object[] parameters= getParameters(parameterInjectors, context);
 			try {
 				T t= constructor.newInstance(parameters);
@@ -198,7 +203,7 @@ abstract class AbstractContainer implements Container{
 		ExternalContext<?> externalContext;
 		InternalFactory<?> factory;
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		FieldInjector(Field f, Container container){
+		FieldInjector(Field f, ComponentFactory componentFactory){
 			this.f=f;
 			if(!f.isAccessible()){
 				SecurityManager sm= System.getSecurityManager();
@@ -219,8 +224,8 @@ abstract class AbstractContainer implements Container{
 			}
 			
 			Key<?> key= Key.newInstance(f.getClass(), name);
-			this.externalContext= new ExternalContext(container, key); 
-			factory= ((AbstractContainer)container).getFactory(key);
+			this.externalContext= new ExternalContext(componentFactory, key); 
+			factory= ((AbstractComponentFactory)componentFactory).getFactory(key);
 		}
 		
 		public void inject(InternalContext context, Object instance){
@@ -322,6 +327,17 @@ abstract class AbstractContainer implements Container{
 	
 	public <T>T getComponent(Class<T> type){
 		return getComponent("default", type);
+	}
+	
+	public <T>T inject(final Class<T> type){
+		return callInContext(new ContextualCallable<T>(){
+
+			@Override
+			public T call(InternalContext context) {
+				return getConstructor(type).construct(context);
+			}
+			
+		});
 	}
 	
 }

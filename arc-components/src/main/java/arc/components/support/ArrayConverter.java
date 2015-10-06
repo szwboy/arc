@@ -1,4 +1,4 @@
-package arc.ioc;
+package arc.components.support;
 
 public class ArrayConverter implements Converter {
 
