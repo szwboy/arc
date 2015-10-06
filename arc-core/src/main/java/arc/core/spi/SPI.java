@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Enumeration;
@@ -15,32 +13,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javassist.NotFoundException;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-
 import arc.core.bytecode.ClassGenerator;
 import arc.core.proxy.ProxyFactory;
 import arc.core.spi.annotation.Adaptive;
 import arc.core.spi.annotation.Spi;
 
 
-public class SpiLoader<T> {
-	private static final Logger log= Logger.getLogger(SpiLoader.class);
+public class SPI<T> {
+	private static final Logger log= Logger.getLogger(SPI.class);
 	
-	private static final String ARC_DIRECTORY="META-INFO/arc/";
+	private static final String ARC_DIRECTORY="META-INF/arc/";
 
-	private final static Map<Class<?>, SpiLoader<?>> containers= new ConcurrentHashMap<Class<?>, SpiLoader<?>>();
+	private final static Map<Class<?>, SPI<?>> SPI_CACHE= new ConcurrentHashMap<Class<?>, SPI<?>>();
 	
 	private Class<T> type;
 	private volatile T cachedAdaptive;
 	private Class<? extends T> cachedAdaptiveClass;
 	private Throwable createAdaptiveError;
-	private static final Lock lock= new ReentrantLock();
 	
 	private Map<String, Class<? extends T>> cachedClasses;
 	private Set<Class<? extends T>> cachedWrapperClasses;
@@ -49,7 +40,7 @@ public class SpiLoader<T> {
 	private boolean creating;
 	
 	@SuppressWarnings("unchecked")
-	public static <T>SpiLoader<T> getLoader(Class<T> type){
+	public static <T>SPI<T> getLoader(Class<T> type){
 		if(type==null)
 			throw new IllegalArgumentException("Extension type= null");
 		if(!type.isInterface())
@@ -57,19 +48,19 @@ public class SpiLoader<T> {
 		if(!type.isAnnotationPresent(Spi.class))
 			throw new IllegalArgumentException(type.getCanonicalName()+" is not extension since no spi annotation");
 		
-		if(containers.containsKey(type)) return (SpiLoader<T>) containers.get(type);
+		if(SPI_CACHE.containsKey(type)) return (SPI<T>) SPI_CACHE.get(type);
 		
-		containers.put(type, new SpiLoader<T>(type));
-		SpiLoader<T> container= (SpiLoader<T>) containers.get(type);
+		SPI_CACHE.put(type, new SPI<T>(type));
+		SPI<T> loader= (SPI<T>) SPI_CACHE.get(type);
 		
-		return container;
+		return loader;
 	}
 	
-	private SpiLoader(Class<T> type){
+	private SPI(Class<T> type){
 		this.type= type;
 	}
 	
-	private T getAdaptive(){
+	public T getAdaptive(){
 		if(createAdaptiveError== null){
 			try{
 				if(cachedAdaptive== null){
@@ -95,7 +86,7 @@ public class SpiLoader<T> {
 		}
 		if(!cachedInstances.containsKey(name)){ 
 			
-			cachedInstances.put(name, createObject(name));
+			cachedInstances.put(name, getAdaptive());
 			creating= false;
 			T t= cachedInstances.get(name);
 			inject(t);
@@ -106,7 +97,7 @@ public class SpiLoader<T> {
 	}
 	
 	private T createProxy(){
-		ProxyFactory factory= SpiLoader.getLoader(ProxyFactory.class).getAdaptive();
+		ProxyFactory factory= SPI.getLoader(ProxyFactory.class).getAdaptive();
 		return factory.getProxy(type);
 	}
 	
@@ -127,11 +118,11 @@ public class SpiLoader<T> {
 				Annotation[][] ass= con.getParameterAnnotations();
 				Object[] args= new Object[pts.length];
 				for(int i=0;i<ass.length;i++){
-					Annotation[] as= ass[i];
-					String qualifier="";
-					String value="";
-					for(int j=0;j<as.length;j++){
-						Annotation a= as[j];
+//					Annotation[] as= ass[i];
+//					String qualifier="";
+//					String value="";
+//					for(int j=0;j<as.length;j++){
+//						Annotation a= as[j];
 						
 //						if(a instanceof Qualifier){
 //							qualifier= ((Qualifier)a).value();
@@ -143,7 +134,7 @@ public class SpiLoader<T> {
 //							break;
 //						}
 						
-					}
+//					}
 					
 //					if(StringUtils.isBlank(qualifier)&& StringUtils.isBlank(value)){
 //						try {
@@ -203,7 +194,7 @@ public class SpiLoader<T> {
 		
 		Enumeration<URL> urls;
 		try {
-			ClassLoader cl= SpiLoader.class.getClassLoader();
+			ClassLoader cl= SPI.class.getClassLoader();
 
 			if(cl!= null){
 				urls= cl.getResources(file);
@@ -345,7 +336,7 @@ public class SpiLoader<T> {
 		
 		Method[] ms= type.getMethods();
 		
-		ClassGenerator ac= ClassGenerator.newInstance(SpiLoader.class.getClassLoader());
+		ClassGenerator ac= ClassGenerator.newInstance(SPI.class.getClassLoader());
 		for(Method m: ms){
 
 			StringBuilder code= new StringBuilder();
@@ -372,7 +363,7 @@ public class SpiLoader<T> {
 					code.append("else throw new "+IllegalArgumentException.class.getName()+"(\"args"+i+"."+expr+" is null or spi value is null\");");
 					code.append(type.getName()+" ret= null;");
 					code.append("try{");
-					code.append("ret=("+type.getName()+")arc.ioc.Container.getContainer("+type.getName()+".class).getObject(name);");
+					code.append("ret=("+type.getName()+")arc.core.spi.SpiLoader.getLoader("+type.getName()+".class).getObject(name);");
 					code.append("if(ret== null){throw new "+IllegalArgumentException.class.getName()+"(\"no supported class for \"+name+\",class:"+type.getName()+"\");}");
 					code.append("}catch(java.lang.Throwable t){throw new java.lang.RuntimeException(t.getMessage());}");
 					if(Void.TYPE!= m.getReturnType()) code.append("return ");
