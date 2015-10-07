@@ -22,18 +22,12 @@ import arc.core.bytecode.ClassGenerator;
 import arc.core.util.ReflectUtils;
 
 public class JavassistProxyFactory extends AbstractProxyFactory {
-
-	private InvocationHandler handler;
-	
-	public JavassistProxyFactory(Object instance){
-		handler= new AopInvocationHandler(instance);
-	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected <T>T doProxy(Class<T> ifc){
 		Class<? super T>[] ics= ReflectUtils.getAllInterfaces(ifc);
-		return (T) Proxy.getProxy(ics).newInstance(handler);
+		return (T) Proxy.getProxy(ics).newInstance(new );
 	}
 	
 	protected abstract static class Proxy {

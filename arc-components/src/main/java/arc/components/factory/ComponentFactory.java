@@ -29,11 +29,4 @@ public interface ComponentFactory {
 	 * @return
 	 */
 	<T>Set<String> getComponentNames(Class<T> type);
-	
-	/**
-	 * instantiate a bean
-	 * @param type
-	 * @return
-	 */
-	<T> T inject(final Class<T> type);
 }

@@ -23,7 +23,7 @@ import arc.core.util.ReflectUtils;
  * @author sunzhongwei
  *
  */
-abstract class AbstractComponentFactory implements ComponentFactory{
+abstract class AbstractComponentFactory implements ComponentFactory, DependencyInjector{
 
 
 	/*store internal context for current creating bean*/
@@ -275,10 +275,22 @@ abstract class AbstractComponentFactory implements ComponentFactory{
 		}
 	}
 	
+	/**
+	 * injector of a member
+	 * @author sunzhongwei
+	 *
+	 */
 	interface Injector{
 		void inject(InternalContext context, Object instance);
 	}
 	
+	/**
+	 * It has a callback method,which would create a internalcontext
+	 * to keep the context of this component
+	 * @author sunzhongwei
+	 * @param callable
+	 * @return
+	 */
 	public <T>T callInContext(ContextualCallable<T> callable){
 		InternalContext[] reference= localContext.get();
 		try{
@@ -293,6 +305,11 @@ abstract class AbstractComponentFactory implements ComponentFactory{
 		}
 	}
 	
+	/**
+	 * context of dependency. 
+	 *
+	 * @param <T>
+	 */
 	public static interface ContextualCallable<T>{
 		
 		T call(InternalContext context);
@@ -314,6 +331,9 @@ abstract class AbstractComponentFactory implements ComponentFactory{
 		}
 	}
 	
+	/**==============================================================
+	 * implementation of {@link ComponentFactory}
+	 *=============================================================*/
 	public <T>T getComponent(final String name, final Class<T> type){
 		return callInContext(new ContextualCallable<T>(){
 
@@ -329,12 +349,32 @@ abstract class AbstractComponentFactory implements ComponentFactory{
 		return getComponent("default", type);
 	}
 	
+	/**=================================================
+	 * implementation of {@link DependencyInjector}
+	 *================================================*/
 	public <T>T inject(final Class<T> type){
 		return callInContext(new ContextualCallable<T>(){
 
 			@Override
 			public T call(InternalContext context) {
 				return getConstructor(type).construct(context);
+			}
+			
+		});
+	}
+	
+	public <T>void inject(final T t){
+		callInContext(new ContextualCallable<T>(){
+
+			@Override
+			public T call(InternalContext context) {
+				AbstractComponentFactory componentFactory= (AbstractComponentFactory) context.getComponentFactory();
+				List<Injector> injectors= componentFactory.getConstructor(t.getClass()).injectors;
+				
+				for(Injector injector: injectors){
+					injector.inject(context, t);
+				}
+				return t;
 			}
 			
 		});

@@ -25,7 +25,6 @@ public class ServiceLoader<T> {
 	
 	/*spi directory*/
 	private static final String ARC_DIRECTORY="META-INF/arc/";
-
 	/*cache all service loaders*/
 	private final static Map<Class<?>, ServiceLoader<?>> SPI_CACHE= new ConcurrentHashMap<Class<?>, ServiceLoader<?>>();
 	/*service interface type*/
@@ -45,7 +44,7 @@ public class ServiceLoader<T> {
 	/*adaptive is in creation*/
 	private boolean creating;
 	/*factory to get bean of dependencies*/
-	private ServiceFactory serviceFactory;
+	private DependencyFactory dependencyFactory;
 	
 	/**
 	 * get service loader for a specified service interface type
@@ -71,7 +70,11 @@ public class ServiceLoader<T> {
 	
 	private ServiceLoader(Class<T> type){
 		this.type= type;
-		this.serviceFactory= type!= ServiceFactory.class?ServiceLoader.getLoader(ServiceFactory.class).getAdaptiveProvider(): null;
+		this.dependencyFactory= type!= DependencyFactory.class?ServiceLoader.getLoader(DependencyFactory.class).getAdaptiveProvider(): null;
+	}
+	
+	public Set<Class<? extends T>> getWrapperClasses(){
+		return cachedWrapperClasses;
 	}
 	
 	/**
@@ -82,7 +85,9 @@ public class ServiceLoader<T> {
 		if(createAdaptiveError== null){
 			try{
 				if(cachedAdaptive== null){
-					cachedAdaptive= createAdaptive();
+					synchronized(cachedAdaptive){
+						cachedAdaptive= createAdaptive();
+					}
 				}
 			}catch(Throwable t){
 				createAdaptiveError= t;
@@ -99,8 +104,22 @@ public class ServiceLoader<T> {
 	 * @return
 	 */
 	public T getProvider(String name){
-		return null;
-				//(T) beanFactory.getBean(name);
+		if(!cachedInstances.containsKey(name)){
+			synchronized(cachedInstances){
+				if(!cachedClasses.containsKey(name)){
+					getClasses();
+				}
+				
+				Class<? extends T> impl= cachedClasses.get(name);
+				try {
+					cachedInstances.put(name, type.cast(impl.newInstance()));
+				} catch (InstantiationException | IllegalAccessException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		}
+		return cachedInstances.get(name);
 	}
 	
 	private T createProxy(){
@@ -110,8 +129,12 @@ public class ServiceLoader<T> {
 	
 	private T createAdaptive() throws InstantiationException, IllegalAccessException{
 		Class<? extends T> type= getAdaptiveClass();
-		T adaptive= serviceFactory.inject(type.newInstance());
+		T adaptive= inject(type);
 		return adaptive;
+	}
+	
+	private T inject(Class<? extends T> type){
+		return dependencyFactory.depend(type);
 	}
 	
 	private Class<? extends T> getAdaptiveClass(){
@@ -128,8 +151,10 @@ public class ServiceLoader<T> {
 	private void getClasses(){
 		
 		if(cachedClasses== null){
-			cachedClasses= new HashMap<String, Class<? extends T>>();
-			loadFile(ARC_DIRECTORY);
+			synchronized(cachedClasses){
+				cachedClasses= new HashMap<String, Class<? extends T>>();
+				loadFile(ARC_DIRECTORY);
+			}
 		}
 	}
 	
@@ -203,10 +228,6 @@ public class ServiceLoader<T> {
 		} catch (Throwable t) {
 			log.error("exception occurs when load extension(interface:"+type.getName()+",class file:"+file, t);
 		}
-	}
-	
-	private T inject(Class<? extends T> type){
-		throw new RuntimeException("Un supported inject");
 	}
 	
 	@SuppressWarnings("unchecked")
