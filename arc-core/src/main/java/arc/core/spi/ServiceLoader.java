@@ -2,8 +2,6 @@ package arc.core.spi;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Enumeration;
@@ -13,34 +11,49 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+
 import arc.core.bytecode.ClassGenerator;
 import arc.core.proxy.ProxyFactory;
 import arc.core.spi.annotation.Adaptive;
 import arc.core.spi.annotation.Spi;
 
-
-public class SPI<T> {
-	private static final Logger log= Logger.getLogger(SPI.class);
+public class ServiceLoader<T> {
+	private static final Logger log= Logger.getLogger(ServiceLoader.class);
 	
+	/*spi directory*/
 	private static final String ARC_DIRECTORY="META-INF/arc/";
 
-	private final static Map<Class<?>, SPI<?>> SPI_CACHE= new ConcurrentHashMap<Class<?>, SPI<?>>();
-	
+	/*cache all service loaders*/
+	private final static Map<Class<?>, ServiceLoader<?>> SPI_CACHE= new ConcurrentHashMap<Class<?>, ServiceLoader<?>>();
+	/*service interface type*/
 	private Class<T> type;
+	/*cached adaptive instance*/
 	private volatile T cachedAdaptive;
+	/*cached adaptive class*/
 	private Class<? extends T> cachedAdaptiveClass;
+	/*adaptive creation error*/
 	private Throwable createAdaptiveError;
-	
+	/*map name with provider class*/
 	private Map<String, Class<? extends T>> cachedClasses;
+	/*adaptive wrapper*/
 	private Set<Class<? extends T>> cachedWrapperClasses;
+	/*map name with provider instance*/
 	private Map<String, T> cachedInstances;
-	
+	/*adaptive is in creation*/
 	private boolean creating;
+	/*factory to get bean of dependencies*/
+	private ServiceFactory serviceFactory;
 	
+	/**
+	 * get service loader for a specified service interface type
+	 * @param type
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
-	public static <T>SPI<T> getLoader(Class<T> type){
+	public static <T>ServiceLoader<T> getLoader(Class<T> type){
 		if(type==null)
 			throw new IllegalArgumentException("Extension type= null");
 		if(!type.isInterface())
@@ -48,19 +61,24 @@ public class SPI<T> {
 		if(!type.isAnnotationPresent(Spi.class))
 			throw new IllegalArgumentException(type.getCanonicalName()+" is not extension since no spi annotation");
 		
-		if(SPI_CACHE.containsKey(type)) return (SPI<T>) SPI_CACHE.get(type);
+		if(SPI_CACHE.containsKey(type)) return (ServiceLoader<T>) SPI_CACHE.get(type);
 		
-		SPI_CACHE.put(type, new SPI<T>(type));
-		SPI<T> loader= (SPI<T>) SPI_CACHE.get(type);
+		SPI_CACHE.put(type, new ServiceLoader<T>(type));
+		ServiceLoader<T> loader= (ServiceLoader<T>) SPI_CACHE.get(type);
 		
 		return loader;
 	}
 	
-	private SPI(Class<T> type){
+	private ServiceLoader(Class<T> type){
 		this.type= type;
+		this.serviceFactory= type!= ServiceFactory.class?ServiceLoader.getLoader(ServiceFactory.class).getAdaptiveProvider(): null;
 	}
 	
-	public T getAdaptive(){
+	/**
+	 * get adaptive instance for specified service interface
+	 * @return
+	 */
+	public T getAdaptiveProvider(){
 		if(createAdaptiveError== null){
 			try{
 				if(cachedAdaptive== null){
@@ -75,97 +93,24 @@ public class SPI<T> {
 		return cachedAdaptive;
 	}
 	
-	public T getObject(final String name){
-		
-		if(creating){
-			return createProxy();
-		}
-		
-		if(cachedInstances== null){
-			cachedInstances= new HashMap<String, T>();
-		}
-		if(!cachedInstances.containsKey(name)){ 
-			
-			cachedInstances.put(name, getAdaptive());
-			creating= false;
-			T t= cachedInstances.get(name);
-			inject(t);
-			
-		}
-		
-		return cachedInstances.get(name);
+	/**
+	 * get specified provider
+	 * @param name
+	 * @return
+	 */
+	public T getProvider(String name){
+		return null;
+				//(T) beanFactory.getBean(name);
 	}
 	
 	private T createProxy(){
-		ProxyFactory factory= SPI.getLoader(ProxyFactory.class).getAdaptive();
+		ProxyFactory factory= ServiceLoader.getLoader(ProxyFactory.class).getAdaptiveProvider();
 		return factory.getProxy(type);
 	}
 	
-	@SuppressWarnings("unchecked")
-	private T createObject(String name){
-		
-		creating= true;
-		Class<? extends T> clz= cachedClasses.get(name.toLowerCase());
-		Constructor<? extends T>[] cons= (Constructor<? extends T>[]) clz.getConstructors();
-		T t= null;
-		
-		try{
-			for(Constructor<? extends T> con: cons){
-			
-//				if(!con.isAnnotationPresent(Inject.class)) continue;
-				
-				Class<?>[] pts= con.getParameterTypes();
-				Annotation[][] ass= con.getParameterAnnotations();
-				Object[] args= new Object[pts.length];
-				for(int i=0;i<ass.length;i++){
-//					Annotation[] as= ass[i];
-//					String qualifier="";
-//					String value="";
-//					for(int j=0;j<as.length;j++){
-//						Annotation a= as[j];
-						
-//						if(a instanceof Qualifier){
-//							qualifier= ((Qualifier)a).value();
-//							break;
-//						}
-//						
-//						if(a instanceof Value){
-//							value= ((Value)a).value();
-//							break;
-//						}
-						
-//					}
-					
-//					if(StringUtils.isBlank(qualifier)&& StringUtils.isBlank(value)){
-//						try {
-//							qualifier=ReflectUtils.detectConstructorPn(clz, con.getParameterTypes(), i);
-//						} catch (NotFoundException e) {
-//							log.error(e);
-//						}
-//
-//						args[i]=SpiLoader.getLoader(pts[i]).getObject(qualifier);
-//					}
-//					
-//					if(StringUtils.isNotBlank(value)){
-//						args[i]= conveter.convert(value, pts[i]);
-//					}
-					
-				}
-				
-				t= con.newInstance(args);
-				break;
-			}
-			t= clz.newInstance();
-		}catch(Throwable th){
-			throw new IllegalStateException(th);
-
-		}
-		return t;
-	}
-	
 	private T createAdaptive() throws InstantiationException, IllegalAccessException{
-		Class<? extends T> clz= getAdaptiveClass();
-		T adaptive= clz.newInstance();
+		Class<? extends T> type= getAdaptiveClass();
+		T adaptive= serviceFactory.inject(type.newInstance());
 		return adaptive;
 	}
 	
@@ -194,7 +139,7 @@ public class SPI<T> {
 		
 		Enumeration<URL> urls;
 		try {
-			ClassLoader cl= SPI.class.getClassLoader();
+			ClassLoader cl= ServiceLoader.class.getClassLoader();
 
 			if(cl!= null){
 				urls= cl.getResources(file);
@@ -260,75 +205,8 @@ public class SPI<T> {
 		}
 	}
 	
-	private void inject(T instance){
-//		Class<?> clz= instance.getClass();
-//		do{
-//			for(Method m: clz.getDeclaredMethods()){
-//				if(m.isAnnotationPresent(Inject.class)){
-//					
-//					try {
-//						
-//						final Class<?>[] pts= m.getParameterTypes();
-//						Object[] values= new Object[pts.length];
-//						Annotation[][] ass= m.getParameterAnnotations();
-//						for(int i=0;i<ass.length;i++){
-//							Annotation[] as= ass[i];
-//							String qualifier="";
-//							String value="";
-//							for(int j=0;j<as.length;j++){
-//							
-//								//if(arg== null) throw new IllegalStateException("the args"+i+" must have value for method:"+clz.getCanonicalName()+"."+m.getName()); 
-//								
-//								Annotation a= as[j];
-//								
-//								if(a instanceof Qualifier){
-//									qualifier= ((Qualifier)a).value();
-//									break;
-//								}
-//								
-//								if(a instanceof Value){
-//									value= ((Value)a).value();
-//									break;
-//								}
-//							}	
-//							
-//							if(StringUtils.isBlank(value)&& StringUtils.isNotBlank(qualifier)) 
-//								throw new IllegalStateException("method:"+clz.getCanonicalName()+"."+m.getName()+" has both value and ref");
-//							
-//							if(StringUtils.isNotBlank(value)){
-//								values[i]=conveter.convert(value, pts[i]);
-//							}else{
-//							
-//								if(StringUtils.isBlank(qualifier)){
-//									qualifier= ReflectUtils.detectPn(clz, m.getName(), i);
-//								}
-//								
-//								if(StringUtils.isBlank(qualifier)) throw new IllegalStateException("the value of args"+i+" must have ref for method:"+clz.getCanonicalName()+"."+m.getName());
-//								
-//								values[i]= SpiLoader.getLoader(pts[i]).getObject(qualifier);
-//							}
-//							
-//						}
-//						
-//						m.invoke(instance, values);
-//						
-//					} catch (NotFoundException e) {
-//					} catch (IllegalAccessException e) {
-//					} catch (IllegalArgumentException e) {
-//					} catch (InvocationTargetException e) {
-//					}
-//				}
-//			}
-//			
-//			for(Field f: clz.getDeclaredFields()){
-//				
-//			}
-//			
-//			for(Constructor<?> c: clz.getDeclaredConstructors()){
-//				
-//			}
-//			clz= clz.getSuperclass();
-//		}while(clz!= Object.class);
+	private T inject(Class<? extends T> type){
+		throw new RuntimeException("Un supported inject");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -336,7 +214,7 @@ public class SPI<T> {
 		
 		Method[] ms= type.getMethods();
 		
-		ClassGenerator ac= ClassGenerator.newInstance(SPI.class.getClassLoader());
+		ClassGenerator ac= ClassGenerator.newInstance(ServiceLoader.class.getClassLoader());
 		for(Method m: ms){
 
 			StringBuilder code= new StringBuilder();
@@ -363,7 +241,7 @@ public class SPI<T> {
 					code.append("else throw new "+IllegalArgumentException.class.getName()+"(\"args"+i+"."+expr+" is null or spi value is null\");");
 					code.append(type.getName()+" ret= null;");
 					code.append("try{");
-					code.append("ret=("+type.getName()+")arc.core.spi.SpiLoader.getLoader("+type.getName()+".class).getObject(name);");
+					code.append("ret=("+type.getName()+")arc.core.spi.ServiceLoader.getLoader("+type.getName()+".class).getObject(name);");
 					code.append("if(ret== null){throw new "+IllegalArgumentException.class.getName()+"(\"no supported class for \"+name+\",class:"+type.getName()+"\");}");
 					code.append("}catch(java.lang.Throwable t){throw new java.lang.RuntimeException(t.getMessage());}");
 					if(Void.TYPE!= m.getReturnType()) code.append("return ");

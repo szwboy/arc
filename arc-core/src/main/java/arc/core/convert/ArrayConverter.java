@@ -1,4 +1,4 @@
-package arc.components.support;
+package arc.core.convert;
 
 public class ArrayConverter implements Converter {
 

@@ -7,12 +7,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import arc.components.support.ComponentRegistry;
-import arc.components.support.Converter;
 import arc.components.support.Scope;
-import arc.core.spi.SPI;
-import arc.core.spi.annotation.Adaptive;
+import arc.core.convert.Converter;
+import arc.core.spi.ServiceLoader;
 
-@Adaptive
 public final class RegistrableComponentFactory extends AbstractComponentFactory implements ComponentRegistry{
 
 	/*store all factories, every factory will generate a type of bean*/
@@ -47,7 +45,7 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 			@Override
 			public T create(InternalContext context) {
 				//use spi loader
-				Converter converter= SPI.getLoader(Converter.class).getAdaptive();
+				Converter converter= ServiceLoader.getLoader(Converter.class).getAdaptiveProvider();
 				return converter.convert(value, impl);
 			}
 			
@@ -89,6 +87,11 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 		}
 		
 		return factoriesByName.get(type);
+	}
+
+	@Override
+	public <T> boolean containesFactory(String name, Class<T> requiredType) {
+		return factories.containsKey(Key.newInstance(requiredType, name));
 	}
 
 }

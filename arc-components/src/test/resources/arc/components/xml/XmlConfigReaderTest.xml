@@ -3,6 +3,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	xsi:schemaLocation="http://www.arc.com/schema/components http://www.arc.com/schema/components/arc-components.xsd">
 	
-	<component id="a" class="arc.components.xml.A" scope="single"></component>
-	<constant id="school" value="sunyao central junoir school"></constant>
+	<component id="a" impl="arc.components.xml.A" scope="single"></component>
+	<constant id="school" value="sunyao central junoir school" impl="java.lang.String"></constant>
 </components>

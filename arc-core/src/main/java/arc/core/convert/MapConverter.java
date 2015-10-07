@@ -1,4 +1,4 @@
-package arc.components.support;
+package arc.core.convert;
 //package arc.ioc;
 //
 //import org.codehaus.jackson.map.ObjectMapper;

@@ -21,7 +21,7 @@ public class ComponentConfigParserDelegate{
 	
 	public static final String IMPORT_ELEMENT="import";
 	public static final String COMPONENT_ELEMENT="component";
-	public static final String CONST_ELEMENT="const";
+	public static final String CONST_ELEMENT="constant";
 	public static final String DEFAULT_SPLIT=",;";
 	
 	public static final String CLASS_ATTRIBUTE="class";
@@ -29,72 +29,42 @@ public class ComponentConfigParserDelegate{
 	public static final String SCOPE_ATTRIBUTE="scope";
 	public static final String ID_ATTRIBUTE="id";
 	public static final String VALUE_ATTRIBUTE="value";
+	public static final String RESOURCE_ATTRIBUTE="resource";
 	
-	private static final Logger log= Logger.getLogger(ComponentConfigParserDelegate.class);
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	private void parse(Element e){
 		if(isNodeEquals(IMPORT_ELEMENT,e)){
-			String resourcePaths=e.getAttribute("resource");
+			String resourcePaths=e.getAttribute(RESOURCE_ATTRIBUTE);
 			StringTokenizer stringTokenizer=new StringTokenizer(resourcePaths,DEFAULT_SPLIT);
 			while(stringTokenizer.hasMoreTokens()){
 				String resourcePath=stringTokenizer.nextToken();
-				if(StringUtils.isBlank(resourcePath)) continue;
-				
-				readerContext.getReader().loadDefinition(resourcePath);
-				
+				if(StringUtils.isNotBlank(resourcePath)) readerContext.getReader().loadDefinition(resourcePath);
 			}
 			
 		}else if(isNodeEquals(COMPONENT_ELEMENT,e)){
-			String impl=e.getAttribute("impl");
-			try {
-				Component component = parseComponent(e, ClassUtils.getClass(impl));
-				readerContext.getRegistry().factory(component.getId(), component.getImpl(), component.getScope());
-			} catch (ClassNotFoundException e1) {
-				log.error(e);
-			}
+			String impl=e.getAttribute(IMPL_ATTRIBUTE);
+			Component<?> component = createComponent(impl);
+			component.accept(new ComponentAttributeVisitor(e));
+			readerContext.getRegistry().factory(component.getId(), component.getType(), component.getScope());
 		}else if(isNodeEquals(CONST_ELEMENT,e)){
-			Component<?> component=parseConst(e);
+			String type=e.getAttribute(CLASS_ATTRIBUTE);
+			
+			if(StringUtils.isBlank(type)){
+				type= e.getAttribute(IMPL_ATTRIBUTE);
+			}
+			Component constant=createComponent(type);
+			constant.accept(new ConstantVisitor(e));
+			readerContext.getRegistry().constant(constant.getId(), constant.getValue(), constant.getType(), constant.getImpl());
 		}
 	}
 	
-	private <T>Component<T> parseConst(Element e){
-		
-//		String clazz=e.getAttribute("class");
-//		Component<T> config= new Component<T>(clazz);
-//		
-//		String id= e.getAttribute("id");
-//		if(StringUtils.isNotBlank(id)){
-//			config.setId(id);
-//		}
-//		
-//		String impl= e.getAttribute("impl");
-//		if(StringUtils.isNotBlank(impl)){
-//			config.setImpl(impl);
-//		}
-//		
-//		String scope= e.getAttribute("scope");
-//		if(StringUtils.isNotBlank(scope)){
-//			config.setImpl(scope);
-//		}
-		
-		return null;
-	}
-	
-	private <T>Component<T> parseComponent(Element e, Class<T> impl){
-		Component<T> component= new Component<T>(impl);
-		
-		String id= e.getAttribute(ID_ATTRIBUTE);
-		if(StringUtils.isNotBlank(id)){
-			component.setId(id);
+	@SuppressWarnings("unchecked")
+	private <T>Component<T> createComponent(String type){
+		try {
+			return new Component<T>(ClassUtils.getClass(type));
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException("cannot get the class of "+type, e);
 		}
-		
-		String scope= e.getAttribute(SCOPE_ATTRIBUTE);
-		if(StringUtils.isNotBlank(scope)){
-			component.setScope(scope);
-		}
-		
-		return component;
 	}
 	
 	public boolean isNodeEquals(String name,Element e){

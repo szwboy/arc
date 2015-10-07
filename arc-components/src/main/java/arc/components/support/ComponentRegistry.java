@@ -15,4 +15,12 @@ public interface ComponentRegistry {
 	 * @param type
 	 */
 	<T>void constant(String name, String value, Class<T> type, Class<? extends T> impl);
+	
+	/**
+	 * containes specified factory
+	 * @param name
+	 * @param requiredType
+	 * @return
+	 */
+	<T>boolean containesFactory(String name, Class<T> requiredType);
 }

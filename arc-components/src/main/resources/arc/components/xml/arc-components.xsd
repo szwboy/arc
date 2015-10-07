@@ -62,15 +62,16 @@
 				<xsd:extension base="identifiedType">
 					<xsd:attribute name="value" type="xsd:string" use="required">
 					</xsd:attribute>
+					<xsd:attribute name="class" type="xsd:string">
+					</xsd:attribute>
+					<xsd:attributeGroup ref="componentAttributes"/>
 				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
 	
 	<xsd:attributeGroup name="componentAttributes">
-		<xsd:attribute name="class" type="xsd:string" use="required">
-		</xsd:attribute>
-		<xsd:attribute name="impl" type="xsd:string">
+		<xsd:attribute name="impl" type="xsd:string" use="required">
 		</xsd:attribute>
 		<xsd:attribute name="scope" type="xsd:string">
 		</xsd:attribute>

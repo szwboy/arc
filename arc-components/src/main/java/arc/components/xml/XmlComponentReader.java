@@ -20,7 +20,6 @@ public class XmlComponentReader implements ComponentReader {
 	private DocumentLoader documentLoader=new DefaultDocumentLoader();
 	private NamespaceHandlerResolver resolver=new DefaultNamespaceHandlerResolver();
 	
-	private ComponentConfigParserDelegate parser;
 	private ComponentRegistry registry;
 	
 	//entity resolver to detect xml schema information such as where the schema information is 
@@ -45,7 +44,7 @@ public class XmlComponentReader implements ComponentReader {
 		
 	};
 	
-	public XmlComponentReader(ComponentRegistry registry) throws Exception{
+	public XmlComponentReader(ComponentRegistry registry){
 		this.registry= registry;
 	}
 	
@@ -73,10 +72,6 @@ public class XmlComponentReader implements ComponentReader {
 		return resolver;
 	}
 
-	public ComponentConfigParserDelegate getParser() {
-		return parser;
-	}
-
 	public EntityResolver getEntityResolver() {
 		return entityResolver;
 	}
@@ -92,7 +87,7 @@ public class XmlComponentReader implements ComponentReader {
 	}
 
 	protected void doLoadDefinition(Element root){
-		parser=new ComponentConfigParserDelegate(createReaderContext());
+		ComponentConfigParserDelegate parser=new ComponentConfigParserDelegate(createReaderContext());
 		parser.parseConfig(root);
 	}
 	

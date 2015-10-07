@@ -1,8 +1,7 @@
-package arc.components.support;
+package arc.core.convert;
 
 import arc.core.spi.annotation.Adaptive;
 import arc.core.spi.annotation.Spi;
-
 
 @Spi
 public interface Converter {
