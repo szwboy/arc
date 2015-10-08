@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import arc.components.factory.annotation.Inject;
 import arc.components.factory.annotation.Qualifier;
 import arc.components.factory.annotation.Value;
+import arc.components.support.DependencyInjector;
 import arc.core.cache.ReferenceCache;
 import arc.core.util.ReflectUtils;
 

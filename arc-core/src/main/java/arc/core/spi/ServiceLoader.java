@@ -73,10 +73,6 @@ public class ServiceLoader<T> {
 		this.dependencyFactory= type!= DependencyFactory.class?ServiceLoader.getLoader(DependencyFactory.class).getAdaptiveProvider(): null;
 	}
 	
-	public Set<Class<? extends T>> getWrapperClasses(){
-		return cachedWrapperClasses;
-	}
-	
 	/**
 	 * get adaptive instance for specified service interface
 	 * @return

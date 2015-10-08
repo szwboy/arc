@@ -1,6 +1,6 @@
 package arc.container.spi;
 
-import arc.components.factory.DependencyInjector;
+import arc.components.support.DependencyInjector;
 import arc.core.spi.DependencyFactory;
 import arc.core.spi.annotation.Adaptive;
 

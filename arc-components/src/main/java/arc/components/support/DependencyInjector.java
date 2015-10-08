@@ -1,4 +1,4 @@
-package arc.components.factory;
+package arc.components.support;
 
 /**
  * inject the dependency

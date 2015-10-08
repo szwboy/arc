@@ -7,6 +7,11 @@ import arc.components.factory.ComponentFactory;
 import arc.components.factory.RegistrableComponentFactory;
 import arc.components.xml.ComponentReader;
 import arc.components.xml.XmlComponentReader;
+import arc.container.event.ContaienrEventMulticaster;
+import arc.container.event.ContainerEvent;
+import arc.container.event.ContainerEventPublisher;
+import arc.container.event.ContainerStartedEvent;
+import arc.container.event.SimpleContainerEventMulticaster;
 import arc.container.spi.SPIDependencyFactory;
 import arc.core.proxy.ProxyFactory;
 import arc.core.spi.DependencyFactory;
@@ -18,26 +23,26 @@ import arc.core.spi.ServiceLoader;
  * @author sunzhongwei
  *
  */
-public class Container implements ComponentFactory{
+public class Container implements ComponentFactory, ContainerEventPublisher{
 	private boolean created;
 	private RegistrableComponentFactory componentFactory;
+	private ContaienrEventMulticaster eventMulticaster;
 	
 	public Container(String locations){
 		create(locations);
 	}
 	public void start(){
-		DependencyFactory dependencyFactory= new SPIDependencyFactory(componentFactory);
-		Set<Class<? extends DependencyFactory>> wrapperClasses= ServiceLoader.getLoader(DependencyFactory.class).getWrapperClasses();
-		if(wrapperClasses!= null){
-			for(Class<? extends DependencyFactory> type: wrapperClasses){
-				try {
-					type.getConstructor(DependencyFactory.class).newInstance(dependencyFactory);
-				} catch (InstantiationException | IllegalAccessException
-						| IllegalArgumentException | InvocationTargetException
-						| NoSuchMethodException | SecurityException e) {
-				}
-			}
-		}
+		
+//		DependencyFactory dependencyFactory= ServiceLoader.getLoader(DependencyFactory.class).getProvider("spi");
+//		if(dependencyFactory instanceof SPIDependencyFactory){
+//			((SPIDependencyFactory)dependencyFactory).setInjector(componentFactory);
+//		}
+		
+		publishEvent(new ContainerStartedEvent(this));
+	}
+	
+	private void initContainerEventMulticaster(){
+		this.eventMulticaster= new SimpleContainerEventMulticaster(componentFactory);
 	}
 	
 	void create(String locations){
@@ -79,8 +84,9 @@ public class Container implements ComponentFactory{
 		
 	}
 	
-	private void publishEvent(){
+	public void publishEvent(ContainerEvent eve) {
 		
+		eventMulticaster.multicastEvent(eve);
 	}
 
 }
