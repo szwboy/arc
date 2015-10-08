@@ -3,9 +3,9 @@ package arc.container.event;
 
 public interface ContaienrEventMulticaster {
 
-	void addListener(ContainerListener<? extends ContainerEvent> listener);
+	void addListener(ContainerListener<ContainerEvent> listener);
 	
-	void removeListener(ContainerListener<? extends ContainerEvent> listener);
+	void removeListener(ContainerListener<ContainerEvent> listener);
 	
 	void addListenerComponentName(String name);
 	

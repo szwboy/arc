@@ -1,22 +1,19 @@
 package arc.container;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import arc.components.factory.ComponentFactory;
 import arc.components.factory.RegistrableComponentFactory;
+import arc.components.support.DependencyInjector;
 import arc.components.xml.ComponentReader;
 import arc.components.xml.XmlComponentReader;
 import arc.container.event.ContaienrEventMulticaster;
 import arc.container.event.ContainerEvent;
 import arc.container.event.ContainerEventPublisher;
+import arc.container.event.ContainerListener;
 import arc.container.event.ContainerStartedEvent;
 import arc.container.event.SimpleContainerEventMulticaster;
-import arc.container.spi.SPIDependencyFactory;
-import arc.core.proxy.ProxyFactory;
-import arc.core.spi.DependencyFactory;
-import arc.core.spi.ServiceLoader;
-
+import arc.container.listener.SPIContainerListener;
 
 /**
  * 
@@ -31,12 +28,18 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 	public Container(String locations){
 		create(locations);
 	}
+	
+	public void init(){
+		initContainerEventMulticaster();
+		registerListeners();
+	}
+	
+	private void registerListeners(){
+		eventMulticaster.addListener(new SPIContainerListener(componentFactory));
+		Set<String> listenerNames= componentFactory.getComponentNames(ContainerListener.class);
+	}
+	
 	public void start(){
-		
-//		DependencyFactory dependencyFactory= ServiceLoader.getLoader(DependencyFactory.class).getProvider("spi");
-//		if(dependencyFactory instanceof SPIDependencyFactory){
-//			((SPIDependencyFactory)dependencyFactory).setInjector(componentFactory);
-//		}
 		
 		publishEvent(new ContainerStartedEvent(this));
 	}
