@@ -100,9 +100,12 @@ public class ServiceLoader<T> {
 	 * @return
 	 */
 	public T getProvider(String name){
+		
+		if(cachedInstances== null) cachedInstances= new HashMap<String, T>();
+		
 		if(!cachedInstances.containsKey(name)){
 			synchronized(cachedInstances){
-				if(!cachedClasses.containsKey(name)){
+				if(cachedClasses== null|| !cachedClasses.containsKey(name)){
 					getClasses();
 				}
 				
@@ -147,6 +150,7 @@ public class ServiceLoader<T> {
 	private void getClasses(){
 		
 		if(cachedClasses== null){
+			cachedClasses= new HashMap<String, Class<? extends T>>();
 			synchronized(cachedClasses){
 				cachedClasses= new HashMap<String, Class<? extends T>>();
 				loadFile(ARC_DIRECTORY);

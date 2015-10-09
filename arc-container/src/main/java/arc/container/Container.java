@@ -11,9 +11,10 @@ import arc.container.event.ContaienrEventMulticaster;
 import arc.container.event.ContainerEvent;
 import arc.container.event.ContainerEventPublisher;
 import arc.container.event.ContainerListener;
+import arc.container.event.ContainerRefreshedEvent;
 import arc.container.event.ContainerStartedEvent;
 import arc.container.event.SimpleContainerEventMulticaster;
-import arc.container.listener.SPIContainerListener;
+import arc.container.event.listener.SPIContainerListener;
 
 /**
  * 
@@ -24,19 +25,34 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 	private boolean created;
 	private RegistrableComponentFactory componentFactory;
 	private ContaienrEventMulticaster eventMulticaster;
+	private String locations;
 	
-	public Container(String locations){
-		create(locations);
+	public Container(String locations, boolean refresh){
+		this.locations= locations;
+		if(refresh){
+			refresh();
+		}
 	}
 	
-	public void init(){
+	public void refresh(){
+		create(locations);
 		initContainerEventMulticaster();
 		registerListeners();
+		
+		publishEvent(new ContainerRefreshedEvent(this));
 	}
 	
 	private void registerListeners(){
 		eventMulticaster.addListener(new SPIContainerListener(componentFactory));
 		Set<String> listenerNames= componentFactory.getComponentNames(ContainerListener.class);
+		for(String listenerName: listenerNames){
+			eventMulticaster.addListenerComponentName(listenerName);
+		}
+	}
+	
+	protected RegistrableComponentFactory getComponentFactory(){
+		
+		return componentFactory;
 	}
 	
 	public void start(){
@@ -48,21 +64,17 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 		this.eventMulticaster= new SimpleContainerEventMulticaster(componentFactory);
 	}
 	
-	void create(String locations){
+	private void create(String locations){
 		if(created) throw new IllegalStateException("container is in creation");
 		created= true;
 		
-		synchronized(componentFactory){
+		synchronized(this){
 			if(componentFactory== null){
 				componentFactory= new RegistrableComponentFactory();
 				ComponentReader reader= new XmlComponentReader(componentFactory);
 				reader.loadDefinition(locations.split(",;"));
 			}
 		}
-	}
-	
-	protected ComponentFactory getComponentFactory(){
-		return componentFactory;
 	}
 	
 	/**=============================================

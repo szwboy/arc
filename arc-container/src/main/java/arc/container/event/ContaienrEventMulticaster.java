@@ -11,5 +11,5 @@ public interface ContaienrEventMulticaster {
 	
 	void removeListenerComponentName(String name);
 	
-	void multicastEvent(ContainerEvent eve);
+	<T extends ContainerEvent>void multicastEvent(T eve);
 }

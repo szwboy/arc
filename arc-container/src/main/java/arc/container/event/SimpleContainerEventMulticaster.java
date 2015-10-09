@@ -54,14 +54,14 @@ public class SimpleContainerEventMulticaster implements ContaienrEventMulticaste
 		Class<?> sourceType= source.getClass();
 		Class<?> eventType= event.getClass();
 		
-		ListenerCacheKey cache= new ListenerCacheKey(sourceType, eventType);
-		if(listenerRetrivers.containsKey(cache)) return listenerRetrivers.get(cache).getContainerListeners();
+		ListenerCacheKey cacheKey= new ListenerCacheKey(sourceType, eventType);
+		if(listenerRetrivers.containsKey(cacheKey)) return listenerRetrivers.get(cacheKey).getContainerListeners();
 		
 		synchronized(listenerRetrivers){
-			if(listenerRetrivers.containsKey(cache)) return listenerRetrivers.get(cache).getContainerListeners();
+			if(listenerRetrivers.containsKey(cacheKey)) return listenerRetrivers.get(cacheKey).getContainerListeners();
 				
 			ListenerRetriever retriever= new ListenerRetriever();
-			listenerRetrivers.put(cache, retriever);
+			listenerRetrivers.put(cacheKey, retriever);
 			return retrieveContainerListeners(sourceType, eventType, retriever);
 		}
 	}
@@ -103,7 +103,7 @@ public class SimpleContainerEventMulticaster implements ContaienrEventMulticaste
 	
 	private boolean supportEvent(ContainerListener<ContainerEvent> listener, Class<?> eventType, Class<?> sourcType){
 		
-		return false;
+		return true;
 	}
 	
 	private class ListenerCacheKey{

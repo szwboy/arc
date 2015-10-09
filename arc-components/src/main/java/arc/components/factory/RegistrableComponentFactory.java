@@ -75,14 +75,29 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 	public <T> Set<String> getComponentNames(Class<T> type) {
 		
 		if(factoriesByName== null){
-			factoriesByName= new HashMap<Class<?>, Set<String>>();
-			
+			synchronized(this){
+				if(factoriesByName== null)
+					factoriesByName= new HashMap<Class<?>, Set<String>>();
+			}
+		}
+		
+		Set<String> factoryNamesByType= factoriesByName.get(type);
+		if(factoryNamesByType== null){
+		
 			for(Key<?> key: factories.keySet()){
-				if(!factoriesByName.containsKey(key.getType())){
-					factoriesByName.put(key.getType(), new HashSet<String>());
+				if(!factoriesByName.containsKey(type)){
+					synchronized(factoriesByName){
+						if(!factoriesByName.containsKey(key)){
+		
+							Class<?> clz= key.getType();
+							if(type.isAssignableFrom(clz)){
+								factoriesByName.put(type, new HashSet<String>());
+							}
+						}
+					}
 				}
-
-				factoriesByName.get(key.getType()).add(key.getName());
+				
+				factoriesByName.get(type).add(key.getName());
 			}
 		}
 		

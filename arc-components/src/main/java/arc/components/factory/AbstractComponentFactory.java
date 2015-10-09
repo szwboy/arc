@@ -29,9 +29,12 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 
 	/*store internal context for current creating bean*/
 	private ThreadLocal<InternalContext[]> localContext= new ThreadLocal<InternalContext[]>(){
-		InternalContext[] initialVlaue(){
+
+		@Override
+		protected InternalContext[] initialValue() {
 			return new InternalContext[1];
 		}
+
 	};
 	
 	@SuppressWarnings("rawtypes")

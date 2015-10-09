@@ -3,5 +3,5 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	xsi:schemaLocation="http://www.arc.com/schema/components http://www.arc.com/schema/components/arc-components.xsd">
 	
-	<component id="a" impl="arc.components.xml.A" scope="single"></component>
+	<component id="spiListener" impl="arc.container.event.listener.SPIContainerListener" scope="single"></component>
 </components>
