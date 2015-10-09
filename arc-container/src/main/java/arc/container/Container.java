@@ -4,7 +4,6 @@ import java.util.Set;
 
 import arc.components.factory.ComponentFactory;
 import arc.components.factory.RegistrableComponentFactory;
-import arc.components.support.DependencyInjector;
 import arc.components.xml.ComponentReader;
 import arc.components.xml.XmlComponentReader;
 import arc.container.event.ContaienrEventMulticaster;
@@ -13,6 +12,7 @@ import arc.container.event.ContainerEventPublisher;
 import arc.container.event.ContainerListener;
 import arc.container.event.ContainerRefreshedEvent;
 import arc.container.event.ContainerStartedEvent;
+import arc.container.event.ContainerStoppedEvent;
 import arc.container.event.SimpleContainerEventMulticaster;
 import arc.container.event.listener.SPIContainerListener;
 
@@ -22,6 +22,7 @@ import arc.container.event.listener.SPIContainerListener;
  *
  */
 public class Container implements ComponentFactory, ContainerEventPublisher{
+	private boolean running;
 	private boolean created;
 	private RegistrableComponentFactory componentFactory;
 	private ContaienrEventMulticaster eventMulticaster;
@@ -32,14 +33,6 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 		if(refresh){
 			refresh();
 		}
-	}
-	
-	public void refresh(){
-		create(locations);
-		initContainerEventMulticaster();
-		registerListeners();
-		
-		publishEvent(new ContainerRefreshedEvent(this));
 	}
 	
 	private void registerListeners(){
@@ -53,11 +46,6 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 	protected RegistrableComponentFactory getComponentFactory(){
 		
 		return componentFactory;
-	}
-	
-	public void start(){
-		
-		publishEvent(new ContainerStartedEvent(this));
 	}
 	
 	private void initContainerEventMulticaster(){
@@ -95,13 +83,32 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 		return componentFactory.getComponentNames(type);
 	}
 	
-	protected void finished(){
-		
-	}
-	
 	public void publishEvent(ContainerEvent eve) {
 		
 		eventMulticaster.multicastEvent(eve);
+	}
+	
+	public void refresh(){
+		create(locations);
+		initContainerEventMulticaster();
+		registerListeners();
+		publishEvent(new ContainerRefreshedEvent(this));
+	}
+	
+	public void start(){
+
+		running= true;
+		publishEvent(new ContainerStartedEvent(this));
+	}
+	
+	public void stop(){
+		destroyComponents();
+		running= false;
+		publishEvent(new ContainerStoppedEvent(this));
+	}
+	
+	private void destroyComponents(){
+		//componentFactory.
 	}
 
 }
