@@ -30,10 +30,6 @@ public class Component<T> {
 		this.id = id;
 	}
 
-	public void setImpl(Class<? extends T> impl) {
-		this.impl = impl;
-	}
-
 	public Class<? extends T> getImpl() {
 		return impl;
 	}
@@ -71,7 +67,7 @@ public class Component<T> {
 		}
 	}
 	
-	void accept(ComponentVisitor visitor){
+	public void accept(ComponentVisitor visitor){
 		visitor.visit(this);
 	}
 	

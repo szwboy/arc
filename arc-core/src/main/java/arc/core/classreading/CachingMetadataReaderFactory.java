@@ -2,13 +2,10 @@ package arc.core.classreading;
 
 import java.io.IOException;
 import java.net.URL;
-import java.text.Annotation;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import arc.core.io.PathMatchingResourcePatternResolver;
 import arc.core.io.ResourceLoader;
 
 public class CachingMetadataReaderFactory implements MetadataReaderFactory {

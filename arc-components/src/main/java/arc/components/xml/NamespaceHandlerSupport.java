@@ -11,8 +11,8 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	private final Map<String, ComponentConfigParser> namespaceParsers=new HashMap<String, ComponentConfigParser>();
 	
 	@Override
-	public void paser(Element e,ParserContext parserContext) {
-		getParserByElement(e).parser(e,parserContext);
+	public void parse(Element e,ParserContext parserContext) {
+		getParserByElement(e).parse(e,parserContext);
 	}
 	
 	protected void registerNamespaceParser(String elementName, ComponentConfigParser parser){

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns="http://www.arc.com/schema/components"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:container="http://www.arc.com/schema/container"
+	xsi:schemaLocation="http://www.arc.com/schema/components
+	 http://www.arc.com/schema/components/arc-components.xsd
+	 http://www.arc.com/schema/container
+	 http://www.arc.com/schema/container/arc-container.xsd">
+
+	<container:component-scan base-package="arc/container/config/*.class"></container:component-scan>
+</components>

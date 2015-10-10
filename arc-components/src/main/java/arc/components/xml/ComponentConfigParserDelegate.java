@@ -89,14 +89,14 @@ public class ComponentConfigParserDelegate{
 					}else{
 						handler=readerContext.getHandlerResolver().resolve(e.getNamespaceURI());
 						if(handler!=null)	
-							handler.paser(e, createPraserContext());
+							handler.parse(e, createPraserContext());
 					}
 				}
 			}
 		}else{
 			handler=readerContext.getHandlerResolver().resolve(root.getNamespaceURI());
 			if(handler!=null)
-				handler.paser(root, createPraserContext());
+				handler.parse(root, createPraserContext());
 		}
 		
 	}

@@ -6,8 +6,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
+
+import com.sun.xml.internal.ws.org.objectweb.asm.Type;
 
 import arc.core.util.ReflectUtils;
 
@@ -30,7 +33,7 @@ public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMe
 
 	@Override
 	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-		this.className= name;
+		this.className= name.replace('/', '.');
 		isAbstract= Modifier.isAbstract(access);
 		isFinal= Modifier.isFinal(access);
 		isAnnotation= (Opcodes.ACC_ANNOTATION& access)!= 0;

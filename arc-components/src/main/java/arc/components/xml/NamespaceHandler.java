@@ -6,5 +6,5 @@ public interface NamespaceHandler {
 
 	void init();
 	
-	void paser(Element e,ParserContext parserContext);
+	void parse(Element e,ParserContext parserContext);
 }

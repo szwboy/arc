@@ -1,0 +1,13 @@
+<xsd:schema xmlns="http://www.arc.com/schema/container"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		targetNamespace="http://www.arc.com/schema/container">
+
+	<xsd:import namespace="http://www.arc.com/schema/components" schemaLocation="http://www.arc.com/schema/components/arc-components.xsd"/>
+	
+	<xsd:element name="component-scan">
+		<xsd:complexType>
+			<xsd:attribute name="base-package" type="xsd:string" use="required"></xsd:attribute>
+			<xsd:attribute name="resource-pattern" type="xsd:string"></xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>	
+</xsd:schema>	
