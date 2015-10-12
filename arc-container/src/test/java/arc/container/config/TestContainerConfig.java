@@ -1,14 +1,11 @@
 package arc.container.config;
 
 import static org.junit.Assert.*;
-
 import org.junit.Test;
-
 import arc.components.factory.RegistrableComponentFactory;
 import arc.components.support.ComponentRegistry;
 import arc.components.xml.ComponentReader;
 import arc.components.xml.XmlComponentReader;
-import arc.container.Container;
 
 public class TestContainerConfig {
 

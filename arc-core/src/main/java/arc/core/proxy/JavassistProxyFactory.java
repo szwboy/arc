@@ -27,7 +27,7 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
 	@Override
 	protected <T>T doProxy(Class<T> ifc){
 		Class<? super T>[] ics= ReflectUtils.getAllInterfaces(ifc);
-		return (T) Proxy.getProxy(ics).newInstance(new );
+		return (T) Proxy.getProxy(ics).newInstance(getHandler());
 	}
 	
 	protected abstract static class Proxy {

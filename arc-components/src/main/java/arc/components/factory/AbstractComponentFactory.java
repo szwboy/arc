@@ -3,7 +3,9 @@ package arc.components.factory;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.ReflectPermission;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,9 @@ import arc.components.factory.annotation.Qualifier;
 import arc.components.factory.annotation.Value;
 import arc.components.support.DependencyInjector;
 import arc.core.cache.ReferenceCache;
+import arc.core.proxy.InvocationHandler;
+import arc.core.proxy.ProxyFactory;
+import arc.core.spi.ServiceLoader;
 import arc.core.util.ReflectUtils;
 
 /**
@@ -132,10 +137,35 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 		return parameters;
 	}
 	
+	class InjectorInvocationHandler<T> implements InvocationHandler<T>{
+
+		T t;
+		@Override
+		public Object invoke(Method method, Object[] args, Object proxy) {
+			
+			if(t== null) throw new IllegalStateException("instance of "+t.getClass().getName()+" is null");
+			try {
+				return method.invoke(t, args);
+			} catch (IllegalAccessException | IllegalArgumentException e) {
+				throw new RuntimeException(e);
+			} catch (InvocationTargetException e) {
+				throw new RuntimeException(e.getTargetException());
+			} 
+		}
+		
+		public void setObject(T t){
+			this.t= t;
+		}
+		
+	}
+	
 	public class ConstructorInjector<T>{
 		ParameterInjector<?>[] parameterInjectors;
 		Constructor<? extends T> constructor;
 		List<Injector> injectors;
+		boolean creating;
+		T proxy;
+		InvocationHandler<T> handler;
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public ConstructorInjector(Class<? extends T> impl){
@@ -160,14 +190,31 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 			addInjectorsForMember(impl, injectors= new ArrayList<Injector>());
 		}
 		
-		T construct(InternalContext context){
+		T construct(InternalContext context, Class<T> expectedType){
+			if(creating){
+				
+				if(handler== null){
+					synchronized(this){
+						if(handler== null){
+							handler= new InjectorInvocationHandler<T>();
+							proxy= createInjectorProxy(expectedType, handler);
+						}
+					}
+				}
+				
+				return proxy;
+			}
+			
+			creating= true;
 			Object[] parameters= getParameters(parameterInjectors, context);
 			try {
 				T t= constructor.newInstance(parameters);
-				
+				handler.setObject(t);
 				for(Injector injector: injectors){
 					injector.inject(context, t);
 				}
+				
+				creating= false;
 				return t;
 			} catch (Throwable e) {
 				Throwable t= e.getCause();
@@ -175,8 +222,15 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 				if(t instanceof Error) throw (Error)t;
 				
 				throw new RuntimeException(e);
-			} 
+			}
+			
 		}
+	}
+	
+	private <T>T createInjectorProxy(Class<T> type, InvocationHandler<T> handler){
+		ProxyFactory proxyFactory= ServiceLoader.getLoader(ProxyFactory.class).getAdaptiveProvider();
+		proxyFactory.setHandler(handler);
+		return proxyFactory.getProxy(type);
 	}
 	
 	class ParameterInjector<T>{
@@ -361,7 +415,7 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 
 			@Override
 			public T call(InternalContext context) {
-				return getConstructor(type).construct(context);
+				return getConstructor(type).construct(context, type);
 			}
 			
 		});
