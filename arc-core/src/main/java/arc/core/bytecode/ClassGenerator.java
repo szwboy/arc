@@ -190,7 +190,7 @@ public class ClassGenerator {
 			CtClass ctSuperClass= ctSc== null? null: mPool.get(ctSc);
 			if(ctClassName== null)
 				ctClassName= (ctSc==null?
-						ClassGenerator.class.getName(): ctClassName+"$sc")+ CLASS_NAME_COUNTER.getAndIncrement();
+						ClassGenerator.class.getName(): ctSc+"$sc")+ CLASS_NAME_COUNTER.getAndIncrement();
 			
 			ctClass= mPool.makeClass(ctClassName);
 			if(ctSc!= null) ctClass.setSuperclass(ctSuperClass);
@@ -203,6 +203,7 @@ public class ClassGenerator {
 					ctClass.addInterface(ctIfc);
 				}
 			}
+			ctClass.addInterface(mPool.get(DynamicInterface.class.getName()));
 			
 			if(mFields!= null){
 				
@@ -267,5 +268,7 @@ public class ClassGenerator {
 		
 		return "";
 	}
+	
+	interface DynamicInterface{}
 	
 }

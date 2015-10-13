@@ -15,43 +15,46 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.log4j.Logger;
-
 import arc.core.bytecode.ClassGenerator;
 import arc.core.util.ReflectUtils;
 
-public class JavassistProxyFactory extends AbstractProxyFactory {
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	protected <T>T doProxy(Class<T> ifc){
-		Class<? super T>[] ics= ReflectUtils.getAllInterfaces(ifc);
-		return (T) Proxy.getProxy(ics).newInstance(getHandler());
-	}
-	
-	protected abstract static class Proxy {
+abstract class Proxy {
 
-		private static final Logger log = Logger.getLogger(Proxy.class);
-
+		private static final Logger log= Logger.getLogger(Proxy.class);
 		// record the proxy classes number
-		private static final AtomicLong PROXY_CLASS_COUNTER = new AtomicLong(0);
+		private static final AtomicLong PROXY_CLASS_COUNTER= new AtomicLong(0);
 		// the name of package which include the proxy class
-		private static final String PACKAGE_NAME = Proxy.class.getPackage().getName();
-
+		private static final String PACKAGE_NAME= Proxy.class.getPackage().getName();
 		/* store proxy. the key is interfaces list */
-		private static final Map<String, Map<String, Object>> PROXY_MAP = new WeakHashMap<String, Map<String, Object>>();
-
-		private static final Lock lock = new ReentrantLock();
-		private static final Condition wait = lock.newCondition();
-		private static final Object pendingObjectMarker = new Object();
-
-		abstract Object newInstance(InvocationHandler handler);
+		private static final Map<String, Map<String, Object>> PROXY_MAP= new WeakHashMap<String, Map<String, Object>>();
+		/*an object to mark having a thread got the lock*/
+		private static final Object pendingObjectMarker= new Object();
 		
+		private static final Lock lock= new ReentrantLock();
+		private static final Condition wait= lock.newCondition();
+		/**
+		 * generate a proxy object
+		 * @param handler
+		 * @return
+		 */
+		abstract Object newInstance(InvocationHandler<?> handler);
+		
+		/**
+		 * get the proxy for specified interfaces
+		 * @param ics
+		 * @return
+		 */
 		static Proxy getProxy(Class<?>[] ics){
 			return Proxy.getProxy(Proxy.class.getClassLoader(), ics);
 		}
 
+		/**
+		 * get the proxy for specified interfaces
+		 * @param cl classlaoder to load the object
+		 * @param ics
+		 * @return
+		 */
 		static Proxy getProxy(ClassLoader cl, Class<?>[] ics) {
 
 			// the key in the PROXY_MAP is
@@ -87,24 +90,27 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
 				}
 			}
 
-			lock.lock();
-			do {
-				Object value = cache.get(key);
-
-				if (value instanceof Reference)
-					return (Proxy) ((Reference)value).get();
-
-				if (value == null) {
-					cache.put(key, pendingObjectMarker);
-					break;
-				} else {
-					try {
-						wait.await();
-					} catch (InterruptedException e) {
+			try{
+				lock.lock();
+				do {
+					Object value = cache.get(key);
+	
+					if (value instanceof Reference)
+						return (Proxy)((Reference)value).get();
+	
+					if (value == null) {
+						cache.put(key, pendingObjectMarker);
+						break;
+					} else {
+						try {
+							wait.await();
+						} catch (InterruptedException e) {
+						}
 					}
-				}
-			} while (true);
-			lock.unlock();
+				} while (true);
+			}finally{
+				lock.unlock();
+			}
 
 			Proxy proxy= null;
 			ClassGenerator ccg= null;
@@ -199,17 +205,16 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
 				
 				ccg.release();
 				cg.release();
-				
-				lock.lock();
-				if(proxy==null) cache.remove(key);
-				else cache.put(key, new WeakReference<Proxy>(proxy));
-				wait.signalAll();
-				lock.unlock();
+				try{
+					lock.lock();
+					if(proxy==null) cache.remove(key);
+					else cache.put(key, new WeakReference<Proxy>(proxy));
+					wait.signalAll();
+				}finally{
+					lock.unlock();
+				}
 			}
-			
 			return proxy;
 		}
 		
 	}
-
-}

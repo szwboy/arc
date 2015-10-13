@@ -30,7 +30,7 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 			public T create(InternalContext context) {
 				AbstractComponentFactory componentFactory= (AbstractComponentFactory) context.getComponentFactory();
 				ConstructorInjector<T> constructor= componentFactory.getConstructor(impl);
-				return constructor.construct(context);
+				return constructor.construct(context, impl);
 			}
 			
 		};

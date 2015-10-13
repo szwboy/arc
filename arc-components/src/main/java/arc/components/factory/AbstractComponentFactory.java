@@ -165,6 +165,7 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 		List<Injector> injectors;
 		boolean creating;
 		T proxy;
+		T t;
 		InvocationHandler<T> handler;
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -205,16 +206,19 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 				return proxy;
 			}
 			
-			creating= true;
-			Object[] parameters= getParameters(parameterInjectors, context);
+			if(t!= null) return t;
 			try {
-				T t= constructor.newInstance(parameters);
-				handler.setObject(t);
+				creating= true;
+				Object[] parameters= getParameters(parameterInjectors, context);
+				try{
+					t= constructor.newInstance(parameters);
+					handler.setObject(t);
+				}finally{
+					creating= false;
+				}
 				for(Injector injector: injectors){
 					injector.inject(context, t);
 				}
-				
-				creating= false;
 				return t;
 			} catch (Throwable e) {
 				Throwable t= e.getCause();
