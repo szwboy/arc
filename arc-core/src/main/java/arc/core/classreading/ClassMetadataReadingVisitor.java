@@ -1,17 +1,9 @@
 package arc.core.classreading;
 
 import java.lang.reflect.Modifier;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
-
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
-
-import com.sun.xml.internal.ws.org.objectweb.asm.Type;
-
 import arc.core.util.ReflectUtils;
 
 public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata{

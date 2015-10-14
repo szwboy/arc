@@ -2,7 +2,7 @@ package arc.core.proxy;
 
 import arc.core.util.ReflectUtils;
 
-public class InterfaceProxyFactory extends ProxyFactorySupport {
+public class JavassistfaceProxyFactory extends ProxyFactorySupport {
 	
 	@SuppressWarnings("unchecked")
 	public <T> T getProxy(Class<T> ifc) {
