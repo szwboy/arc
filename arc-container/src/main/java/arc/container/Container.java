@@ -1,9 +1,7 @@
 package arc.container;
 
 import java.util.Set;
-
 import arc.components.factory.ComponentFactory;
-import arc.components.factory.Key;
 import arc.components.factory.RegistrableComponentFactory;
 import arc.components.support.Scope;
 import arc.components.xml.ComponentReader;

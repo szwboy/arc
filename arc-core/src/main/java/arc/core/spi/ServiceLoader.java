@@ -132,8 +132,11 @@ public class ServiceLoader<T> {
 		return adaptive;
 	}
 	
-	private T inject(Class<? extends T> type){
-		return dependencyFactory.depend(type);
+	private T inject(Class<? extends T> type) throws InstantiationException, IllegalAccessException{
+		if(dependencyFactory!= null)
+			return dependencyFactory.depend(type);
+		
+		else return type.newInstance();
 	}
 	
 	private Class<? extends T> getAdaptiveClass(){
@@ -262,7 +265,7 @@ public class ServiceLoader<T> {
 					code.append("else throw new "+IllegalArgumentException.class.getName()+"(\"args"+i+"."+expr+" is null or spi value is null\");");
 					code.append(type.getName()+" ret= null;");
 					code.append("try{");
-					code.append("ret=("+type.getName()+")arc.core.spi.ServiceLoader.getLoader("+type.getName()+".class).getObject(name);");
+					code.append("ret=("+type.getName()+")arc.core.spi.ServiceLoader.getLoader("+type.getName()+".class).getProvider(name);");
 					code.append("if(ret== null){throw new "+IllegalArgumentException.class.getName()+"(\"no supported class for \"+name+\",class:"+type.getName()+"\");}");
 					code.append("}catch(java.lang.Throwable t){throw new java.lang.RuntimeException(t.getMessage());}");
 					if(Void.TYPE!= m.getReturnType()) code.append("return ");
