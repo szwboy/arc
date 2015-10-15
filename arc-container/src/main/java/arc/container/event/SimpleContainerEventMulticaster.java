@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import arc.components.factory.ComponentFactory;
+import arc.components.factory.Key;
 
 public class SimpleContainerEventMulticaster implements ContaienrEventMulticaster {
 	private ComponentFactory componentFactory;
@@ -89,7 +90,7 @@ public class SimpleContainerEventMulticaster implements ContaienrEventMulticaste
 		
 		for(String name: listenerBeans){
 			ContainerListener listener= componentFactory.getComponent(name, ContainerListener.class);
-			if(supportEvent(listener, eventType, sourceType)&& allListeners.contains(listener)){
+			if(supportEvent(listener, eventType, sourceType)&& !allListeners.contains(listener)){
 				allListeners.add(listener);
 				
 				if(retriever!= null){
@@ -156,6 +157,7 @@ public class SimpleContainerEventMulticaster implements ContaienrEventMulticaste
 			
 			return allListeners;
 		}
+		
 	}
 
 }

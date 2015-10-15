@@ -22,7 +22,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 		} catch (ParserConfigurationException e) {
 			throw new IllegalStateException("create documentbuilder failure", e);
 		} catch (Throwable t) {
-			throw new IllegalStateException("parse config xml error", t);
+			throw new IllegalStateException("parse config xml error", t.getCause());
 		}
 		
 		return doc;

@@ -5,7 +5,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.lang.reflect.ReflectPermission;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,27 +100,28 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 					value= ((Value) ann).value();
 				}
 				
-				if(StringUtils.isNotBlank(value)&&StringUtils.isNotBlank(name)){
-					throw new RuntimeException("either value or name has value");
-				}
-				
-				if(StringUtils.isNotBlank(value)){
-					// to do
-					
-				}
-				
-				if(StringUtils.isBlank(name)){
-					try {
-						name= ReflectUtils.detectConstructorPn(declaringClass, pts, i);
-					} catch (NotFoundException e) {
-						throw new RuntimeException("cannot auto detect parameter name for the parameter:"+i);
-					}
-				}
-				
-				Key<?> key= Key.newInstance(pts[i], name);
-				ExternalContext<?> context= new ExternalContext(this, key);
-				parameterInjectors[i]= new ParameterInjector(context, getFactory(key));
 			}
+			
+			if(StringUtils.isNotBlank(value)&&StringUtils.isNotBlank(name)){
+				throw new RuntimeException("either value or name has value");
+			}
+			
+			if(StringUtils.isNotBlank(value)){
+				// to do
+				
+			}
+			
+			if(StringUtils.isBlank(name)){
+				try {
+					name= ReflectUtils.detectConstructorPn(declaringClass, pts, i);
+				} catch (NotFoundException e) {
+					throw new RuntimeException("cannot auto detect parameter name for the parameter:"+i);
+				}
+			}
+			
+			Key<?> key= Key.newInstance(pts[i], name);
+			ExternalContext<?> context= new ExternalContext(this, key);
+			parameterInjectors[i]= new ParameterInjector(context, getFactory(name));
 			
 		}
 		
@@ -175,17 +175,26 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 			for(Constructor<T> cons: constructors){
 				if(cons.isAnnotationPresent(Inject.class)){
 					this.constructor= cons;
-					if(!constructor.isAccessible()){
-						SecurityManager sm= System.getSecurityManager();
-						sm.checkPermission(new ReflectPermission("supressAccessCheck"));
-						constructor.setAccessible(true);
-					}
-					
-					Class[] pts= cons.getParameterTypes();
-					Annotation[][] annss= cons.getParameterAnnotations();
-					parameterInjectors= createParameter(annss, pts, impl);
-					
+					break;
 				}
+			}
+			
+			if(constructor== null){
+				this.constructor= constructors[0];
+			}	
+			
+			if(!constructor.isAccessible()){
+				SecurityManager sm= System.getSecurityManager();
+				if(sm!= null)
+					sm.checkPermission(new ReflectPermission("supressAccessCheck"));
+				constructor.setAccessible(true);
+			}
+			
+			Class[] pts= constructor.getParameterTypes();
+			
+			if(pts.length> 0){
+				Annotation[][] annss= constructor.getParameterAnnotations();
+				parameterInjectors= createParameter(annss, pts, impl);
 			}
 			
 			addInjectorsForMember(impl, injectors= new ArrayList<Injector>());
@@ -209,10 +218,10 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 			if(t!= null) return t;
 			try {
 				creating= true;
-				Object[] parameters= getParameters(parameterInjectors, context);
+				Object[] parameters= parameterInjectors==null? null: getParameters(parameterInjectors, context);
 				try{
 					t= constructor.newInstance(parameters);
-					handler.setObject(t);
+					if(handler!= null) handler.setObject(t);
 				}finally{
 					creating= false;
 				}
@@ -269,7 +278,7 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 			this.f=f;
 			if(!f.isAccessible()){
 				SecurityManager sm= System.getSecurityManager();
-				sm.checkPermission(new ReflectPermission("supressAccessCheck"));
+				if(sm!= null) sm.checkPermission(new ReflectPermission("supressAccessCheck"));
 				
 				f.setAccessible(true);
 			}
@@ -287,7 +296,7 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 			
 			Key<?> key= Key.newInstance(f.getClass(), name);
 			this.externalContext= new ExternalContext(componentFactory, key); 
-			factory= ((AbstractComponentFactory)componentFactory).getFactory(key);
+			factory= ((AbstractComponentFactory)componentFactory).getFactory(name);
 		}
 		
 		public void inject(InternalContext context, Object instance){
@@ -377,15 +386,14 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 		T call(InternalContext context);
 	}
 	
-	protected abstract <T>InternalFactory<T> getFactory(Key<T> key);
+	protected abstract <T>InternalFactory<T> getFactory(String name);
 	
 	private <T>T getComponent(String name, Class<T> type, InternalContext context){
-		Key<T> key= Key.newInstance(type, name);
-		InternalFactory<T> factory= getFactory(key);
+		InternalFactory<T> factory= getFactory(name);
 		ExternalContext<?> previous= context.getExternalContext();
 		try{
 			
-			ExternalContext<T> currentContext= new ExternalContext<T>(this, key);
+			ExternalContext<T> currentContext= new ExternalContext<T>(this, Key.newInstance(type, name));
 			context.setExternalContext(currentContext);
 			return factory== null? null: factory.create(context);
 		}finally{
@@ -405,10 +413,6 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 			}
 			
 		});
-	}
-	
-	public <T>T getComponent(Class<T> type){
-		return getComponent("default", type);
 	}
 	
 	/**=================================================

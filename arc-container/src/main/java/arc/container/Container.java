@@ -3,7 +3,9 @@ package arc.container;
 import java.util.Set;
 
 import arc.components.factory.ComponentFactory;
+import arc.components.factory.Key;
 import arc.components.factory.RegistrableComponentFactory;
+import arc.components.support.Scope;
 import arc.components.xml.ComponentReader;
 import arc.components.xml.XmlComponentReader;
 import arc.container.event.ContaienrEventMulticaster;
@@ -14,7 +16,6 @@ import arc.container.event.ContainerRefreshedEvent;
 import arc.container.event.ContainerStartedEvent;
 import arc.container.event.ContainerStoppedEvent;
 import arc.container.event.SimpleContainerEventMulticaster;
-import arc.container.event.listener.SPIContainerListener;
 
 /**
  * 
@@ -36,10 +37,9 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 	}
 	
 	private void registerListeners(){
-		eventMulticaster.addListener(new SPIContainerListener(componentFactory));
 		Set<String> listenerNames= componentFactory.getComponentNames(ContainerListener.class);
-		for(String listenerName: listenerNames){
-			eventMulticaster.addListenerComponentName(listenerName);
+		for(String name: listenerNames){
+			eventMulticaster.addListenerComponentName(name);
 		}
 	}
 	
@@ -72,16 +72,6 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 	public <T> T getComponent(String name, Class<T> type) {
 		return componentFactory.getComponent(name, type);
 	}
-
-	@Override
-	public <T> T getComponent(Class<T> type) {
-		return componentFactory.getComponent(type);
-	}
-
-	@Override
-	public <T> Set<String> getComponentNames(Class<T> type) {
-		return componentFactory.getComponentNames(type);
-	}
 	
 	public void publishEvent(ContainerEvent eve) {
 		
@@ -90,6 +80,7 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 	
 	public void refresh(){
 		create(locations);
+		componentFactory.factory("componentFactory", RegistrableComponentFactory.class, componentFactory, Scope.Singleton);
 		initContainerEventMulticaster();
 		registerListeners();
 		publishEvent(new ContainerRefreshedEvent(this));

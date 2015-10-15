@@ -2,13 +2,12 @@ package arc.components.support;
 
 import arc.components.factory.InternalContext;
 import arc.components.factory.InternalFactory;
-import arc.components.factory.Key;
 
 public enum Scope {
 	Default{
 
 		@Override
-		public <T> InternalFactory<T> scopeFactory(Key<T> key,
+		public <T> InternalFactory<T> scopeFactory(String name,
 				InternalFactory<T> factory) {
 			return factory;
 		}
@@ -18,7 +17,7 @@ public enum Scope {
 	Thread{
 
 		@Override
-		public <T> InternalFactory<T> scopeFactory(Key<T> key,
+		public <T> InternalFactory<T> scopeFactory(String name,
 				final InternalFactory<T> factory) {
 			return new InternalFactory<T>(){
 				ThreadLocal<T> local= new ThreadLocal<T>();
@@ -30,6 +29,10 @@ public enum Scope {
 					
 					return local.get();
 				}
+				@Override
+				public Class<T> getType() {
+					return factory.getType();
+				}
 				
 			};
 		}
@@ -39,7 +42,7 @@ public enum Scope {
 	Singleton{
 
 		@Override
-		public <T> InternalFactory<T> scopeFactory(Key<T> key,
+		public <T> InternalFactory<T> scopeFactory(String name,
 				final InternalFactory<T> factory) {
 			return new InternalFactory<T>(){
 
@@ -51,11 +54,15 @@ public enum Scope {
 					
 					return instance;
 				}
+				@Override
+				public Class<T> getType() {
+					return factory.getType();
+				}
 				
 			};
 		}
 		
 	};
 	
-	public abstract <T>InternalFactory<T> scopeFactory(Key<T> key, InternalFactory<T> factory);
+	public abstract <T>InternalFactory<T> scopeFactory(String name, InternalFactory<T> factory);
 }

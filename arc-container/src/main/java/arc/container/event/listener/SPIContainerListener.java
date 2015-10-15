@@ -1,5 +1,6 @@
 package arc.container.event.listener;
 
+import arc.components.factory.annotation.Qualifier;
 import arc.components.support.DependencyInjector;
 import arc.container.event.ContainerEvent;
 import arc.container.event.ContainerListener;
@@ -8,10 +9,6 @@ import arc.core.spi.DependencyFactory;
 import arc.core.spi.ServiceLoader;
 
 public class SPIContainerListener implements ContainerListener<ContainerEvent> {
-
-	public SPIContainerListener(DependencyInjector injector){
-		this.injector= injector;
-	}
 	
 	@Override
 	public void onContainerEvent(ContainerEvent event) {
@@ -21,6 +18,7 @@ public class SPIContainerListener implements ContainerListener<ContainerEvent> {
 		}
 	}
 	
+	@Qualifier("componentFactory")
 	private DependencyInjector injector;
 
 }

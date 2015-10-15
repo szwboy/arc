@@ -3,6 +3,7 @@ package arc.components.factory;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,14 +15,13 @@ import arc.core.spi.ServiceLoader;
 public final class RegistrableComponentFactory extends AbstractComponentFactory implements ComponentRegistry{
 
 	/*store all factories, every factory will generate a type of bean*/
-	private ConcurrentHashMap<Key<?>, InternalFactory<?>> factories= new ConcurrentHashMap<Key<?>, InternalFactory<?>>();
+	private ConcurrentHashMap<String, InternalFactory<?>> factories= new ConcurrentHashMap<String, InternalFactory<?>>();
 	/* map component type and names*/
 	private Map<Class<?>, Set<String>> factoriesByName;
 	
-	/**
-	 * create factory to generate bean. It will detect the constructor annoatated by {@link Inject} 
-	 * and use that to create instance
-	 */
+	/*====================================================================
+	 *implementation of ComponentRegistry
+	 *====================================================================*/
 	public <T>void factory(String name, final Class<T> impl, Scope scope){
 		
 		InternalFactory<T> factory= new InternalFactory<T>(){
@@ -32,14 +32,37 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 				ConstructorInjector<T> constructor= componentFactory.getConstructor(impl);
 				return constructor.construct(context, impl);
 			}
+
+			@Override
+			public Class<T> getType() {
+				return impl;
+			}
 			
 		};
 		
-		factory(Key.newInstance(impl, name), factory, scope);
+		factory(name, factory, scope);
+	}
+	
+	public <T>void factory(String name, final Class<T> impl, final T t, Scope scope){
+		InternalFactory<T> factory= new InternalFactory<T>(){
+
+			@Override
+			public T create(InternalContext context) {
+				return t;
+			}
+
+			@Override
+			public Class<T> getType() {
+				return impl;
+			}
+			
+		};
+		
+		factory(name, factory, scope);
 	}
 	
 	@Override
-	public <T> void constant(String name, final String value, Class<T> type, final Class<? extends T> impl) {
+	public <T> void constant(String name, final String value, Class<? super T> type, final Class<T> impl) {
 		InternalFactory<T> factory= new InternalFactory<T>(){
 
 			@Override
@@ -48,10 +71,15 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 				Converter converter= ServiceLoader.getLoader(Converter.class).getAdaptiveProvider();
 				return converter.convert(value, impl);
 			}
+
+			@Override
+			public Class<T> getType() {
+				return impl;
+			}
 			
 		};
 		
-		factory(Key.newInstance(type, name), factory, Scope.Singleton);
+		factory(name, factory, Scope.Singleton);
 	}
 	
 	/**
@@ -60,19 +88,19 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 	 * @param factory
 	 * @param scope
 	 */
-	private <T>void factory(Key<T> key, InternalFactory<T> factory, Scope scope){
-		InternalFactory<?> internalFactory= scope.scopeFactory(key, factory);
-		factories.put(key, internalFactory);
+	private <T>void factory(String name, InternalFactory<T> factory, Scope scope){
+		InternalFactory<?> internalFactory= scope.scopeFactory(name, factory);
+		factories.put(name, internalFactory);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected <T>InternalFactory<T> getFactory(Key<T> key) {
-		return ((InternalFactory<T>) factories.get(key));
+	protected <T>InternalFactory<T> getFactory(String name) {
+		return ((InternalFactory<T>) factories.get(name));
 	}
 
 	@Override
-	public <T> Set<String> getComponentNames(Class<T> type) {
+	public Set<String> getComponentNames(Class<?> type) {
 		
 		if(factoriesByName== null){
 			synchronized(this){
@@ -84,20 +112,19 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 		Set<String> factoryNamesByType= factoriesByName.get(type);
 		if(factoryNamesByType== null){
 		
-			for(Key<?> key: factories.keySet()){
-				if(!factoriesByName.containsKey(type)){
+			for(Entry<String, InternalFactory<?>> entry: factories.entrySet()){
+				Class<?> clz= entry.getValue().getType();
+				if(type.isAssignableFrom(clz)){
 					synchronized(factoriesByName){
-						if(!factoriesByName.containsKey(key)){
-		
-							Class<?> clz= key.getType();
-							if(type.isAssignableFrom(clz)){
+						if(!factoriesByName.containsKey(type)){
+							if(!factoriesByName.containsKey(entry.getKey())){
 								factoriesByName.put(type, new HashSet<String>());
 							}
 						}
-					}
+						factoriesByName.get(type).add(entry.getKey());
+					}	
 				}
 				
-				factoriesByName.get(type).add(key.getName());
 			}
 		}
 		
@@ -105,8 +132,8 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 	}
 
 	@Override
-	public <T> boolean containesFactory(String name, Class<T> requiredType) {
-		return factories.containsKey(Key.newInstance(requiredType, name));
+	public <T> boolean containesFactory(String name) {
+		return factories.containsKey(name);
 	}
 
 }

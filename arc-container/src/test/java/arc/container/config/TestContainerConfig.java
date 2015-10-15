@@ -1,7 +1,10 @@
 package arc.container.config;
 
 import static org.junit.Assert.*;
+import junit.framework.Assert;
+
 import org.junit.Test;
+
 import arc.components.factory.RegistrableComponentFactory;
 import arc.components.support.ComponentRegistry;
 import arc.components.xml.ComponentReader;
@@ -14,7 +17,7 @@ public class TestContainerConfig {
 		ComponentRegistry registry= new RegistrableComponentFactory();
 		ComponentReader reader= new XmlComponentReader(registry);
 		reader.loadDefinition("/annotation.xml");
-		registry.containesFactory("testBean", TestBean.class);
+		Assert.assertEquals(true, registry.containesFactory("testBean"));
 	}
 
 }

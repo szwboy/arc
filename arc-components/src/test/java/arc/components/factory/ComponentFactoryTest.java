@@ -1,23 +1,31 @@
-package arc.components.xml;
+package arc.components.factory;
 
+import static org.junit.Assert.*;
 import junit.framework.Assert;
-import junit.framework.TestCase;
-import arc.components.factory.RegistrableComponentFactory;
+
+import org.junit.Test;
+
 import arc.components.support.ComponentRegistry;
 import arc.components.xml.ComponentReader;
 import arc.components.xml.XmlComponentReader;
 
-public class XmlComponentReaderTest extends TestCase {
+public class ComponentFactoryTest {
 
-	public void testLoadDefinitions(){
+	@Test
+	public void test() {
 		try {
 			ComponentRegistry registry= new RegistrableComponentFactory();
 			ComponentReader reader= new XmlComponentReader(registry);
-			reader.loadDefinition("/arc/components/xml/XmlConfigReaderTest.xml");
+			reader.loadDefinition("/arc/components/factory/ComponentFactoryReaderTest.xml");
 			Assert.assertTrue(registry.containesFactory("a"));
-			Assert.assertTrue(registry.containesFactory("school"));
+			Assert.assertTrue(registry.containesFactory("b"));
+			
+			A a= ((ComponentFactory)registry).getComponent("a", A.class);
+			B b= a.getB();
+			Assert.assertTrue(a== b.getA());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 }

@@ -12,7 +12,7 @@ public class ExternalContext<T> {
 		this.key = key;
 	}
 
-	public ComponentFactory getContainer() {
+	public ComponentFactory getComponentFactory() {
 		return componentFactory;
 	}
 

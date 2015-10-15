@@ -1,5 +1,7 @@
 package arc.container.event;
 
+import arc.components.factory.Key;
+
 
 public interface ContaienrEventMulticaster {
 

@@ -21,7 +21,7 @@ public abstract class ReferenceCache<K, V> extends ReferenceMap<K, V> {
 	}
 	
 	public ReferenceCache(){
-		super(ReferenceType.STRONG, ReferenceType.STRONG);
+		this(ReferenceType.STRONG, ReferenceType.STRONG);
 	}
 	
 	protected abstract V doCreate(K key);
@@ -32,7 +32,7 @@ public abstract class ReferenceCache<K, V> extends ReferenceMap<K, V> {
 				public V call() throws Exception {
 					
 					V value;
-					if((value=ReferenceCache.this.get(key))== null){
+					if((value=ReferenceCache.super.get(key))== null){
 						value= doCreate(key);
 					}
 					return value;

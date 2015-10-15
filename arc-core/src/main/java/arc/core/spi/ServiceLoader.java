@@ -81,7 +81,7 @@ public class ServiceLoader<T> {
 		if(createAdaptiveError== null){
 			try{
 				if(cachedAdaptive== null){
-					synchronized(cachedAdaptive){
+					synchronized(this){
 						cachedAdaptive= createAdaptive();
 					}
 				}

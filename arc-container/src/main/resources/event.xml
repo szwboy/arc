@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns="http://www.arc.com/schema/components"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://www.arc.com/schema/components http://www.arc.com/schema/components/arc-components.xsd">
+	
+	<component id="spiListener" impl="arc.container.event.listener.SPIContainerListener" scope="single"></component>
+</components>

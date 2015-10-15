@@ -1,5 +1,7 @@
 package arc.components.support;
 
+import java.util.Set;
+
 
 public interface ComponentRegistry {
 
@@ -9,12 +11,16 @@ public interface ComponentRegistry {
 	<T>void factory(String name, final Class<T> impl, Scope scope);
 	
 	/**
+	 * factory to generate bean component
+	 */
+	<T>void factory(String name, final Class<T> impl, T t, Scope scope);
+	/**
 	 * factory to generate constant
 	 * @param name
 	 * @param value
 	 * @param type
 	 */
-	<T>void constant(String name, String value, Class<T> type, Class<? extends T> impl);
+	<T>void constant(String name, String value, Class<? super T> type, Class<T> impl);
 	
 	/**
 	 * containes specified factory
@@ -22,5 +28,12 @@ public interface ComponentRegistry {
 	 * @param requiredType
 	 * @return
 	 */
-	<T>boolean containesFactory(String name, Class<T> requiredType);
+	<T>boolean containesFactory(String name);
+	
+	/**
+	 * get all component names by type
+	 * @param type
+	 * @return
+	 */
+	Set<String> getComponentNames(Class<?> type);
 }
