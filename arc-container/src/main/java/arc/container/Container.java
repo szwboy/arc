@@ -1,6 +1,7 @@
 package arc.container;
 
 import java.util.Set;
+
 import arc.components.factory.ComponentFactory;
 import arc.components.factory.RegistrableComponentFactory;
 import arc.components.support.Scope;
@@ -69,6 +70,11 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 	@Override
 	public <T> T getComponent(String name, Class<T> type) {
 		return componentFactory.getComponent(name, type);
+	}
+	
+	@Override
+	public Object getComponent(String name) {
+		return componentFactory.getComponent(name);
 	}
 	
 	public void publishEvent(ContainerEvent eve) {

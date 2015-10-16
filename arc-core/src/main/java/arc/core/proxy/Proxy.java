@@ -27,7 +27,7 @@ abstract class Proxy {
 	// the name of package which include the proxy class
 	private static final String PACKAGE_NAME= Proxy.class.getPackage().getName();
 	/* store proxy. the key is interfaces list */
-	private static final Map<String, Map<String, Object>> PROXY_MAP= new WeakHashMap<String, Map<String, Object>>();
+	private static final Map<ClassLoader, Map<String, Object>> PROXY_MAP= new WeakHashMap<ClassLoader, Map<String, Object>>();
 	/*an object to mark having a thread got the lock*/
 	private static final Object pendingObjectMarker= new Object();
 	
@@ -94,7 +94,7 @@ abstract class Proxy {
 			if (cache == null) {
 
 				cache = new HashMap<String, Object>();
-				PROXY_MAP.put(key, cache);
+				PROXY_MAP.put(cl, cache);
 			}
 		}
 
@@ -120,11 +120,11 @@ abstract class Proxy {
 			lock.unlock();
 		}
 
-		return interfaceProxy(ics, cl, key);
+		return isInterfaceProxied?interfaceProxy(ics, cl, key): classProxy(ics[0], cl, key);
 	}
 	
 	
-	static Proxy ClassProxy(Class<?> type, ClassLoader cl, String key){
+	static Proxy classProxy(Class<?> type, ClassLoader cl, String key){
 		String pkg = type.getPackage().getName();
 
 		ClassGenerator cg= ClassGenerator.newInstance(cl);
@@ -134,6 +134,7 @@ abstract class Proxy {
 		// ignore repeated method
 		Method[] ms = type.getMethods();
 		for (int i = 0; i < ms.length; i++) {
+			if(ms[i].getDeclaringClass()== Object.class) continue;
 			addMethod(ms[i], mms, cg, i);
 		}
 			
@@ -215,8 +216,8 @@ abstract class Proxy {
 		}catch(Throwable t){
 			log.error(t);
 		}finally{
-			ccg.release();
-			cg.release();
+			if(ccg!= null) ccg.release();
+			if(cg!= null) cg.release();
 			try{
 				lock.lock();
 				if(proxy==null) PROXY_MAP.get(cl).remove(key);

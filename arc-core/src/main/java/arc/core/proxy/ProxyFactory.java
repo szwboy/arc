@@ -11,5 +11,6 @@ public interface ProxyFactory {
 	@Adaptive
 	<T>T getProxy(Class<T> ifc);
 	
+	@Adaptive
 	void setHandler(InvocationHandler<?> handler);
 }

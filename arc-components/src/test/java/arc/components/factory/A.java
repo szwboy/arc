@@ -11,6 +11,8 @@ public class A {
 		this.b= b;
 	}
 	
+	public A(){}
+	
 	public B getB(){
 		return b;
 	}

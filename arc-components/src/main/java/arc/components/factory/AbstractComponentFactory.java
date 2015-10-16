@@ -409,7 +409,19 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 
 			@Override
 			public T call(InternalContext context) {
-				return getComponent(name, type, context);
+				return type.cast(getComponent(name, type, context));
+			}
+			
+		});
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Object getComponent(final String name){
+		return callInContext(new ContextualCallable(){
+
+			@Override
+			public Object call(InternalContext context) {
+				return getComponent(name, Object.class, context);
 			}
 			
 		});

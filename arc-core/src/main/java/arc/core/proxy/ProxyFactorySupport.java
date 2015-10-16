@@ -1,7 +1,5 @@
 package arc.core.proxy;
 
-
-
 public abstract class ProxyFactorySupport implements ProxyFactory {
 	private InvocationHandler<?> handler;
 	

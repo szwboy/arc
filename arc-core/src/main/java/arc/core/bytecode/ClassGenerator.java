@@ -234,7 +234,7 @@ public class ClassGenerator {
 			return ctClass.toClass();
 			
 		}catch(RuntimeException e){
-			
+			throw e;
 		} catch (NotFoundException e) {
 		} catch (CannotCompileException e) {
 		}
@@ -269,6 +269,6 @@ public class ClassGenerator {
 		return "";
 	}
 	
-	interface DynamicInterface{}
+	public interface DynamicInterface{}
 	
 }

@@ -12,11 +12,11 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import arc.core.bytecode.ClassGenerator;
-import arc.core.proxy.ProxyFactory;
 import arc.core.spi.annotation.Adaptive;
 import arc.core.spi.annotation.Spi;
 
@@ -82,7 +82,9 @@ public class ServiceLoader<T> {
 			try{
 				if(cachedAdaptive== null){
 					synchronized(this){
-						cachedAdaptive= createAdaptive();
+						if(cachedAdaptive== null){
+							cachedAdaptive= createAdaptive();
+						}
 					}
 				}
 			}catch(Throwable t){
@@ -121,11 +123,6 @@ public class ServiceLoader<T> {
 		return cachedInstances.get(name);
 	}
 	
-	private T createProxy(){
-		ProxyFactory factory= ServiceLoader.getLoader(ProxyFactory.class).getAdaptiveProvider();
-		return factory.getProxy(type);
-	}
-	
 	private T createAdaptive() throws InstantiationException, IllegalAccessException{
 		Class<? extends T> type= getAdaptiveClass();
 		T adaptive= inject(type);
@@ -154,11 +151,9 @@ public class ServiceLoader<T> {
 		
 		if(cachedClasses== null){
 			cachedClasses= new HashMap<String, Class<? extends T>>();
-			synchronized(cachedClasses){
-				cachedClasses= new HashMap<String, Class<? extends T>>();
-				loadFile(ARC_DIRECTORY);
-			}
 		}
+		
+		loadFile(ARC_DIRECTORY);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -194,7 +189,7 @@ public class ServiceLoader<T> {
 								String name= line.substring(0, index);
 								String value= line.substring(index+1);
 								
-								Class<? extends T> clz= (Class<? extends T>) Class.forName(value);
+								Class<? extends T> clz= (Class<? extends T>)ClassUtils.getClass(value);
 								
 								if(!type.isAssignableFrom(clz)){
 									throw new IllegalStateException(clz.getName()+" is not subtype of interface:"+type.getName());

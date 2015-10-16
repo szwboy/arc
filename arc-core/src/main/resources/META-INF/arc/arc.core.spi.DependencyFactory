@@ -1,0 +1,2 @@
+adaptive=arc.core.spi.DependencyFactoryAdaptive
+spi=arc.container.spi.SPIDependencyFactory
