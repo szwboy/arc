@@ -21,7 +21,7 @@ public class SPIContainerListener implements ContainerListener<ContainerEvent> {
 		
 		DependencyFactory adaptivedependencyFactory= ServiceLoader.getLoader(DependencyFactory.class).getAdaptiveProvider();
 		if(adaptivedependencyFactory instanceof DependencyFactoryAdaptive){
-			((DependencyFactoryAdaptive)dependencyFactory).setDependencyFactory(adaptivedependencyFactory);
+			((DependencyFactoryAdaptive)adaptivedependencyFactory).setDependencyFactory(dependencyFactory);
 		}
 	}
 	
