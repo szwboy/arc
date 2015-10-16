@@ -22,6 +22,10 @@ public class ComponentFactoryTest {
 			
 			A a= ((ComponentFactory)registry).getComponent("a", A.class);
 			B b= a.getB();
+			a.sayHello();
+			b.sayHello();
+			b.getA().sayHello();
+			a.getB().sayHello();
 			Assert.assertTrue(a== b.getA());
 		} catch (Exception e) {
 			e.printStackTrace();

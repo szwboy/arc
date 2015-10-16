@@ -13,6 +13,10 @@ public class A {
 	
 	public A(){}
 	
+	public void sayHello(){
+		System.out.println("Hello A");
+	}
+	
 	public B getB(){
 		return b;
 	}

@@ -11,6 +11,10 @@ public class B {
 		this.a= a;
 	}
 	
+	public void sayHello(){
+		System.out.println("Hello b");
+	}
+	
 	public B(){};
 	
 	public A getA(){
