@@ -1,9 +1,12 @@
 package arc.core.classreading;
 
 import java.lang.reflect.Modifier;
+import java.util.LinkedHashSet;
 import java.util.Set;
+
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
+
 import arc.core.util.ReflectUtils;
 
 public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata{
@@ -46,6 +49,7 @@ public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMe
 			String _outerName= ReflectUtils.convertResourcePathToClassName(outerName);
 			String _name= ReflectUtils.convertResourcePathToClassName(name);
 			if(_outerName.equals(this.className)){
+				if(memberClasses== null) memberClasses= new LinkedHashSet<String>();
 				this.memberClasses.add(name);
 			}else if(_name.equals(this.className)){
 				enclosingClass= _outerName;

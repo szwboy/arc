@@ -129,7 +129,7 @@ class RecursiveAnnoationArrayVisitor extends RecursiveAnnotationVisitor{
 		if(attributes.containsKey(name)){
 			values= (Object[]) attributes.get(name);
 			values= Arrays.copyOf(values, values.length+1);
-			values[values.length]= value;
+			values[values.length-1]= value;
 		}else{
 			values= new Object[1];
 			values[0]= value;

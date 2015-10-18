@@ -7,7 +7,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ReflectPermission;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javassist.NotFoundException;
 
@@ -28,9 +30,9 @@ import arc.core.util.ReflectUtils;
  * @author sunzhongwei
  *
  */
-abstract class AbstractComponentFactory implements ComponentFactory, DependencyInjector{
+public abstract class AbstractComponentFactory implements ConfigurableComponentFactory, DependencyInjector{
 
-
+	private final Set<ComponentPostProcessor<?>> componentPostProcessors= new LinkedHashSet<ComponentPostProcessor<?>>();
 	/*store internal context for current creating bean*/
 	private ThreadLocal<InternalContext[]> localContext= new ThreadLocal<InternalContext[]>(){
 
@@ -456,6 +458,17 @@ abstract class AbstractComponentFactory implements ComponentFactory, DependencyI
 			}
 			
 		});
+	}
+	
+	/*=================================================================
+	 * Implementation of configurable component factory
+	 *================================================================*/
+	public void addComponentPostProcessor(ComponentPostProcessor<?> componentPostProcessor){
+		componentPostProcessors.add(componentPostProcessor);
+	}
+	
+	public Set<ComponentPostProcessor<?>> getComponentPostProcessors(){
+		return this.componentPostProcessors;
 	}
 	
 }

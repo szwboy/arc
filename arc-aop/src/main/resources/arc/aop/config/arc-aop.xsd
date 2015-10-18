@@ -1,0 +1,6 @@
+<xsd:schema xmlns="http://www.arc.com/schema/container"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		targetNamespace="http://www.arc.com/schema/aop">
+	<xsd:element name="aspect-autoproxy">
+	</xsd:element>	
+</xsd:schema>	

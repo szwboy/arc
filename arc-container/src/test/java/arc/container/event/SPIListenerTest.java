@@ -7,7 +7,7 @@ public class SPIListenerTest {
 
 	@Test
 	public void test() {
-		Container container= new Container("/event.xml", false);
+		Container container= new Container("/annotation.xml", false);
 		container.refresh();
 	}
 

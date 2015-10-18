@@ -91,10 +91,13 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		
 		String rootDir, name="";
 		RegexPath next;
+		boolean includeAllSub;
 		
 		RegexPath(String path){
 			if(matcher.isPattern(path)){
-				path= path.replaceAll("\\*", "\\\\w+");
+//				path= path.replaceAll("\\*\\*", "\\\\w+");
+//				path= path.replaceAll("\\*", "[a-zA-Z_0-9\\$]+");
+				path= path.replace("\\.", "\\\\.");
 				int start= start(path);
 				rootDir= path.substring(0, start+1);
 				group(path.substring(start+1));
@@ -105,7 +108,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 		
 		private int start(String path){
-			String pattern= "/\\w*\\\\w\\+\\w*";
+			String pattern= "/\\w*\\*+\\w*";
 			Pattern p= Pattern.compile(pattern);
 			Matcher matcher= p.matcher(path);
 			
@@ -123,8 +126,16 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			
 			RegexPath rp= this;
 			while(tokenizer.hasMoreTokens()){
-				rp.name= tokenizer.nextToken();
+				String name=tokenizer.nextToken();
 				//test if the pattern can be resolved
+				if(name.equals("**")){
+					name="\\w+";
+					includeAllSub= true;
+				}else if(name.indexOf("*")!=-1){
+					name= name.replaceAll("\\*", "[a-zA-Z0-9_]+");
+				}
+
+				rp.name= name;
 				Pattern.compile(rp.name);
 				
 				if(!tokenizer.hasMoreTokens()) break;
@@ -203,7 +214,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 						RegexPath rp= path;
 						while(rp!=null&& rp.hasNext()){
 							if(!fullPattern.endsWith("/")) fullPattern+= "/";
-							fullPattern+= rp.getName();
+							fullPattern+= rp.includeAllSub? "["+rp.getName()+"/]+": rp.getName();
 							rp= rp.next();
 						}
 						fullPattern+= "/.+\\.class$";
@@ -226,33 +237,47 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 						File f= new File(url.getFile());
 						if(f.isFile()) throw new IllegalStateException(f.getName()+" should be a folder");
 						
-						File[] sfs= f.listFiles();
-						for(File sf: sfs){
-							String name= sf.getName();
-							if(matcher.isMatch(name, path.name)){
-							
-								if(sf.isDirectory()){
-									RegexPath rp;
-									if(!path.hasNext()){
-										rp= new RegexPath();
-										rp.name="\\w+.*";
-									}else{
-										rp= path.next();
-									}	
-									
-									result.add(new RegexNode(rp, urlAddress+sf.getName()+"/", false));
-								}	
-								else if(!path.hasNext())
-									result.add(new RegexNode(null, urlAddress+sf.getName(), true));
-							}
-						}
+						doGetChildNodes(f.listFiles(), result);
 					}
 				}
 			} catch (IOException e1) {
-				
+				e1.printStackTrace();
 			}
 			
 			return result.toArray(new Node[0]);
+		}
+		
+		private void doGetChildNodes(File[] sfs, List<Node> result){
+//			File[] sfs= f.listFiles();
+			for(File sf: sfs){
+				String name= sf.getName();
+				if(matcher.isMatch(name, path.name)){
+				
+					if(sf.isDirectory()){
+						RegexPath rp;
+						if(!path.hasNext()){
+							rp= new RegexPath();
+							rp.name="\\w+.*";
+						}else{
+							rp= path.next();
+						}	
+						
+						result.add(new RegexNode(rp, urlAddress+sf.getName()+"/", false));
+					}	
+					else if(!path.hasNext())
+						result.add(new RegexNode(null, urlAddress+sf.getName(), true));
+				}
+				
+				if(path.includeAllSub&& sf.isDirectory()){
+					String originalAddress= urlAddress;
+					try{
+						urlAddress+= sf.getName()+"/";
+						doGetChildNodes(sf.listFiles(), result);
+					}finally{
+						urlAddress= originalAddress;
+					}
+				}
+			}
 		}
 
 		@Override

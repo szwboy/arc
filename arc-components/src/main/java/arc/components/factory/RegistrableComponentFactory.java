@@ -30,6 +30,11 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 			public T create(InternalContext context) {
 				AbstractComponentFactory componentFactory= (AbstractComponentFactory) context.getComponentFactory();
 				ConstructorInjector<T> constructor= componentFactory.getConstructor(impl);
+				
+				//post processor bean
+				T t= constructor.construct(context, impl);
+				Set<String> names= getComponentNames(ComponentPostProcessor.class);
+				
 				return constructor.construct(context, impl);
 			}
 

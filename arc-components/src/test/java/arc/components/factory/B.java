@@ -11,6 +11,7 @@ public class B {
 		this.a= a;
 	}
 	
+	@Inject
 	public void sayHello(){
 		System.out.println("Hello b");
 	}

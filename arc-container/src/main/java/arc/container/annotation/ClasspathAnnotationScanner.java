@@ -1,24 +1,15 @@
 package arc.container.annotation;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.text.Annotation;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringUtils;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
 
 import arc.components.support.ComponentRegistry;
 import arc.components.support.Scope;
-import arc.components.xml.Component;
-import arc.components.xml.ComponentVisitor;
 import arc.core.classreading.AnnotationMetadata;
 import arc.core.classreading.CachingMetadataReaderFactory;
 import arc.core.classreading.MetadataReader;

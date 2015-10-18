@@ -2,8 +2,11 @@ package arc.container;
 
 import java.util.Set;
 
+import arc.components.factory.AbstractComponentFactory;
 import arc.components.factory.ComponentFactory;
+import arc.components.factory.ComponentPostProcessor;
 import arc.components.factory.RegistrableComponentFactory;
+import arc.components.support.ComponentRegistry;
 import arc.components.support.Scope;
 import arc.components.xml.ComponentReader;
 import arc.components.xml.XmlComponentReader;
@@ -29,7 +32,7 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 	private String locations;
 	
 	public Container(String locations, boolean refresh){
-		this.locations= locations;
+		this.locations= CONTAINER_EVENT_LOCATION+","+locations;
 		if(refresh){
 			refresh();
 		}
@@ -59,7 +62,7 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 			if(componentFactory== null){
 				componentFactory= new RegistrableComponentFactory();
 				ComponentReader reader= new XmlComponentReader(componentFactory);
-				reader.loadDefinition(locations.split(",;"));
+				reader.loadDefinition(locations.split(","));
 			}
 		}
 	}
@@ -83,11 +86,32 @@ public class Container implements ComponentFactory, ContainerEventPublisher{
 	}
 	
 	public void refresh(){
-		create(locations);
-		componentFactory.factory("componentFactory", RegistrableComponentFactory.class, componentFactory, Scope.Singleton);
-		initContainerEventMulticaster();
-		registerListeners();
+		synchronized(this){
+			create(locations);
+			componentFactory.factory("componentFactory", RegistrableComponentFactory.class, componentFactory, Scope.Singleton);
+			registerComponentPostProcessors(componentFactory);
+			initContainerEventMulticaster();
+			registerListeners();
+			finishRefreshed();
+		}
+	}
+	
+	private void finishRefreshed(){
 		publishEvent(new ContainerRefreshedEvent(this));
+	}
+	
+	/**
+	 * register post processor for component factory
+	 * @param factory
+	 */
+	private void registerComponentPostProcessors(RegistrableComponentFactory factory){
+		Set<String> names= factory.getComponentNames(ComponentPostProcessor.class);
+		if(names!= null){
+			
+			for(String name: names){
+				factory.addComponentPostProcessor(factory.getComponent(name, ComponentPostProcessor.class));
+			}
+		}
 	}
 	
 	public void start(){
