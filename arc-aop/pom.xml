@@ -4,27 +4,23 @@
 
   <groupId>arc.aop</groupId>
   <artifactId>arc-aop</artifactId>
-  <version>0.1</version>
+  <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>arc-aop</name>
-  <url>http://maven.apache.org</url>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
+  
   <dependencies>
     <dependency>
-      <groupId>arc</groupId>
-      <artifactId>arc-components</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+       <groupId>arc</groupId>  
+       <artifactId>arc-core</artifactId>  
+       <version>0.0.1-SNAPSHOT</version>  
+       <type>jar</type>  	
     </dependency>
-    
     <dependency>
-      <groupId>arc</groupId>
-      <artifactId>arc-core</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+       <groupId>arc</groupId>  
+       <artifactId>arc-components</artifactId>  
+       <version>0.0.1-SNAPSHOT</version>  
+       <type>jar</type>  	
     </dependency>
     
     <dependency>
@@ -39,4 +35,10 @@
 		<version>1.8.7</version>
 	</dependency>
   </dependencies>
+  <parent>  
+    <groupId>arc</groupId>  
+    <artifactId>arc-aggregator</artifactId>  
+    <version>0.0.1-SNAPSHOT</version>  
+    <relativePath>../arc-aggregator</relativePath>  
+  </parent>
 </project>
