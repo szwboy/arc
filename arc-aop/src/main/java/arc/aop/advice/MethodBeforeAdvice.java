@@ -1,4 +1,4 @@
-package com.arc.aop.advice;
+package arc.aop.advice;
 
 import java.lang.reflect.Method;
 

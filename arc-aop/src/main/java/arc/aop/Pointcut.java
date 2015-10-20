@@ -1,6 +1,8 @@
-package com.arc.aop.pointcut;
+package arc.aop;
 
 public interface Pointcut {
 
+	ClassFilter getClassFilter();
+	
 	MethodMatcher getMethodMatcher();
 }
