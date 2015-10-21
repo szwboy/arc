@@ -1,7 +1,9 @@
 package arc.aop.aspectj;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.aspectj.weaver.patterns.NamePattern;
@@ -13,6 +15,7 @@ import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutParameter;
 import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.PointcutPrimitive;
+import org.aspectj.weaver.tools.ShadowMatch;
 
 import arc.aop.ClassFilter;
 import arc.aop.MethodMatcher;
@@ -25,6 +28,10 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 	private Class<?> pointcutDeclarationScope;
 	private Class<?>[] pointcutParameterTypes= new Class<?>[0];
 	private String[] pointcutParameterNames= new String[0];
+	
+	private PointcutExpression pointcutExpression;
+	private String expression;
+	private Map<Method, ShadowMatch> shadowMatchCache= new HashMap<Method, ShadowMatch>();
 	
 	private void initPointcutPrimitive(){
 		supportedPointcutKinds.add(PointcutPrimitive.EXECUTION);
@@ -54,6 +61,10 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 		return parser.parsePointcutExpression(getExpression(), pointcutDeclarationScope, pointcutParams);
 	}
 	
+	public void setExpression(String expression){
+		this.expression=expression;
+	}
+	
 	/**
 	 * initialize a pointcut parser and register the new added primitive type component
 	 * @return
@@ -68,37 +79,48 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 	
 	@Override
 	public ClassFilter getClassFilter() {
-		return null;
+		checkReadyToMatch();
+		return this;
 	}
 
 	@Override
 	public MethodMatcher getMethodMatcher() {
-		// TODO Auto-generated method stub
-		return null;
+		checkReadyToMatch();
+		return this;
 	}
 
 	@Override
 	public String getExpression() {
-		// TODO Auto-generated method stub
-		return null;
+		return expression;
 	}
 
 	@Override
 	public boolean matches(Method method, Class<?> clz) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean matches(Method method, Class<?> clz, Object[] args) {
-		// TODO Auto-generated method stub
+		checkReadyToMatch();
 		return false;
+	}
+	
+	private ShadowMatch '.(Method originalMethod, Method targetMethod){
+		
+		ShadowMatch shadowMatch= pointcutExpression.matchesMethodExecution(targetMethod);
+		return shadowMatch;
 	}
 
 	@Override
 	public boolean matches(Class<?> clz) {
-		// TODO Auto-generated method stub
-		return false;
+		checkReadyToMatch();
+		return pointcutExpression.couldMatchJoinPointsInType(clz);
+	}
+	
+	private void checkReadyToMatch(){
+		if(pointcutExpression== null){
+			pointcutExpression= buildPointcutExpression();
+		}
 	}
 	
 	/**
