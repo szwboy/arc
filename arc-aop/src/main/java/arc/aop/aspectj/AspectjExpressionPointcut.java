@@ -6,9 +6,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.weaver.patterns.NamePattern;
+import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ContextBasedMatcher;
 import org.aspectj.weaver.tools.FuzzyBoolean;
+import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.MatchingContext;
 import org.aspectj.weaver.tools.PointcutDesignatorHandler;
 import org.aspectj.weaver.tools.PointcutExpression;
@@ -16,10 +19,13 @@ import org.aspectj.weaver.tools.PointcutParameter;
 import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.ShadowMatch;
-
 import arc.aop.ClassFilter;
 import arc.aop.MethodMatcher;
+import arc.aop.ProxyMethodInvocation;
+import arc.aop.autoproxy.ProxyCreationContext;
+import arc.aop.interceptor.ExposedInvocationInterceptor;
 import arc.aop.pointcut.ExpressionPointcut;
+import arc.core.util.ClassUtils;
 
 public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilter, MethodMatcher {
 	private ClassLoader componentClassLoader;
@@ -95,20 +101,68 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> clz) {
+	public boolean matches(Method method, Class<?> targetClass) {
+		checkReadyToMatch();
+		
+		Method targetMethod= ClassUtils.getMostSpecificMethod(method, targetClass);
+		ShadowMatch shadowMatch= getShadowMatch(method, targetMethod);
+		if(shadowMatch.alwaysMatches()) return true;
+		if(shadowMatch.neverMatches()) return false;
+		
 		return false;
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> clz, Object[] args) {
+	public boolean matches(Method method, Class<?> targetClass, Object[] args) {
 		checkReadyToMatch();
-		return false;
+		
+		Method targetMethod= ClassUtils.getMostSpecificMethod(method, targetClass);
+		ShadowMatch shadowMatch= getShadowMatch(method, targetMethod);
+		if(shadowMatch.alwaysMatches()) return true;
+		if(shadowMatch.neverMatches()) return false;
+		
+		MethodInvocation mi= ExposedInvocationInterceptor.currentInvocation();
+		Object targetObject= mi.getThis();
+		
+		if(mi instanceof ProxyMethodInvocation){
+			throw new IllegalStateException("MethodInvocation is not a arc ProxyMethodInvocation:"+ mi);
+		}
+		
+		ProxyMethodInvocation pmi=(ProxyMethodInvocation)mi;
+		Object thisObject= pmi.getProxy();
+		JoinPointMatch joinPointMatcher= shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
+		if(joinPointMatcher.matches()){
+			bindParameters(pmi, joinPointMatcher);
+		}
+		
+		return joinPointMatcher.matches();
 	}
 	
-	private ShadowMatch '.(Method originalMethod, Method targetMethod){
-		
-		ShadowMatch shadowMatch= pointcutExpression.matchesMethodExecution(targetMethod);
-		return shadowMatch;
+	private void bindParameters(ProxyMethodInvocation pmi, JoinPointMatch jpm){
+		pmi.setUserAttribute(getExpression(), jpm);
+	}
+	
+	private ShadowMatch getShadowMatch(Method originalMethod, Method targetMethod){
+		ShadowMatch shadowMatch= shadowMatchCache.get(targetMethod);
+		if(shadowMatch== null){
+			synchronized(shadowMatchCache){
+				shadowMatch= shadowMatchCache.get(targetMethod);
+				if(shadowMatch== null){
+					shadowMatch= pointcutExpression.matchesMethodExecution(targetMethod);
+					
+					if(shadowMatch== null){
+						shadowMatch= pointcutExpression.matchesMethodExecution(originalMethod);
+					}
+					
+					if(shadowMatch== null){
+						shadowMatch= new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
+					}
+				}
+				
+				shadowMatchCache.put(targetMethod, shadowMatch);
+			}
+		}
+		return shadowMatchCache.get(targetMethod);
 	}
 
 	@Override
@@ -143,6 +197,11 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 		
 	}
 	
+	/**
+	 * to use to match the arc extend aspectj expression--component
+	 * @author sunzhongwei
+	 *
+	 */
 	private class ComponentNameContextBaseMatcher implements ContextBasedMatcher{
 		private NamePattern expressionPattern;
 		
@@ -167,9 +226,11 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 		}
 
 		@Override
+		/**
+		 * match whether or not the component name is matched by the expression
+		 */
 		public FuzzyBoolean matchesStatically(MatchingContext arg0) {
-			String advisedComponentName= null;
-			
+			String advisedComponentName= ProxyCreationContext.getCurrentProxiedBeanName();
 			return FuzzyBoolean.fromBoolean(expressionPattern.matches(advisedComponentName));
 		}
 
