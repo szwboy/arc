@@ -27,6 +27,11 @@ import arc.aop.interceptor.ExposedInvocationInterceptor;
 import arc.aop.pointcut.ExpressionPointcut;
 import arc.core.util.ClassUtils;
 
+/**
+ * 
+ * @author sunzhongwei
+ *
+ */
 public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilter, MethodMatcher {
 	private ClassLoader componentClassLoader;
 	private Set<PointcutPrimitive> supportedPointcutKinds= new HashSet<PointcutPrimitive>();
@@ -39,6 +44,9 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 	private String expression;
 	private Map<Method, ShadowMatch> shadowMatchCache= new HashMap<Method, ShadowMatch>();
 	
+	/**
+	 * init the pointcut kinds which this pointcut supports
+	 */
 	private void initPointcutPrimitive(){
 		supportedPointcutKinds.add(PointcutPrimitive.EXECUTION);
 		supportedPointcutKinds.add(PointcutPrimitive.ARGS);
@@ -58,29 +66,8 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 		this.pointcutParameterNames= paramNames;
 	}
 
-	private PointcutExpression buildPointcutExpression(){
-		PointcutParser parser= initializePointcutParser();
-		PointcutParameter[] pointcutParams= new PointcutParameter[pointcutParameterNames.length];
-		for(int i=0; i<pointcutParameterNames.length; i++){
-			pointcutParams[i]= parser.createPointcutParameter(pointcutParameterNames[i], pointcutParameterTypes[i]);
-		}
-		return parser.parsePointcutExpression(getExpression(), pointcutDeclarationScope, pointcutParams);
-	}
-	
 	public void setExpression(String expression){
 		this.expression=expression;
-	}
-	
-	/**
-	 * initialize a pointcut parser and register the new added primitive type component
-	 * @return
-	 */
-	private PointcutParser initializePointcutParser(){
-		PointcutParser parser= PointcutParser.
-				getPointcutParserSupportingSpecifiedPrimitivesAndUsingSpecifiedClassLoaderForResolution(
-						supportedPointcutKinds, componentClassLoader);
-		parser.registerPointcutDesignatorHandler(new ComponentNamePointcutDesignatorHandler());
-		return parser;
 	}
 	
 	@Override
@@ -171,10 +158,39 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 		return pointcutExpression.couldMatchJoinPointsInType(clz);
 	}
 	
+	/**
+	 * check whether the match condition is ready
+	 */
 	private void checkReadyToMatch(){
 		if(pointcutExpression== null){
 			pointcutExpression= buildPointcutExpression();
 		}
+	}
+	
+	/**
+	 * use the aspectj expression to build a pointcutexpression
+	 * @return
+	 */
+	private PointcutExpression buildPointcutExpression(){
+		PointcutParser parser= initializePointcutParser();
+		PointcutParameter[] pointcutParams= new PointcutParameter[pointcutParameterNames.length];
+		for(int i=0; i<pointcutParameterNames.length; i++){
+			pointcutParams[i]= parser.createPointcutParameter(pointcutParameterNames[i], pointcutParameterTypes[i]);
+		}
+		return parser.parsePointcutExpression(getExpression(), pointcutDeclarationScope, pointcutParams);
+	}
+	
+	/**
+	 * initialize a pointcut parser
+	 * @return
+	 */
+	private PointcutParser initializePointcutParser(){
+		PointcutParser parser= PointcutParser.
+				getPointcutParserSupportingSpecifiedPrimitivesAndUsingSpecifiedClassLoaderForResolution(
+						supportedPointcutKinds, componentClassLoader);
+		//register a extended primitive kind component
+		parser.registerPointcutDesignatorHandler(new ComponentNamePointcutDesignatorHandler());
+		return parser;
 	}
 	
 	/**
@@ -191,8 +207,8 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 		}
 
 		@Override
-		public ContextBasedMatcher parse(String arg0) {
-			return new ComponentNameContextBaseMatcher(arg0);
+		public ContextBasedMatcher parse(String expression) {
+			return new ComponentNameContextBaseMatcher(expression);
 		}
 		
 	}
