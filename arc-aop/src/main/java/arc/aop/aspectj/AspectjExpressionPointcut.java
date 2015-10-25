@@ -19,12 +19,14 @@ import org.aspectj.weaver.tools.PointcutParameter;
 import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.ShadowMatch;
+
 import arc.aop.ClassFilter;
 import arc.aop.MethodMatcher;
 import arc.aop.ProxyMethodInvocation;
 import arc.aop.autoproxy.ProxyCreationContext;
 import arc.aop.interceptor.ExposedInvocationInterceptor;
 import arc.aop.pointcut.ExpressionPointcut;
+import arc.aop.pointcut.IntroductionAwareMethodMatcher;
 import arc.core.util.ClassUtils;
 
 /**
@@ -32,7 +34,7 @@ import arc.core.util.ClassUtils;
  * @author sunzhongwei
  *
  */
-public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilter, MethodMatcher {
+public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilter, IntroductionAwareMethodMatcher {
 	private ClassLoader componentClassLoader;
 	private Set<PointcutPrimitive> supportedPointcutKinds= new HashSet<PointcutPrimitive>();
 	
@@ -60,6 +62,8 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 		supportedPointcutKinds.add(PointcutPrimitive.AT_TARGET);
 	}
 	
+	public AspectjExpressionPointcut(){}
+	
 	public AspectjExpressionPointcut(Class<?> pointcutDeclarationScope, String[] paramNames, Class<?>[] paramTypes){
 		initPointcutPrimitive();
 		this.pointcutParameterTypes= paramTypes;
@@ -70,12 +74,16 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 		this.expression=expression;
 	}
 	
+	/*------------------------------------
+	 * implementation of expression pointcut
+	 *----------------------------------*/
 	@Override
 	public ClassFilter getClassFilter() {
 		checkReadyToMatch();
 		return this;
 	}
 
+	
 	@Override
 	public MethodMatcher getMethodMatcher() {
 		checkReadyToMatch();
@@ -87,16 +95,27 @@ public class AspectjExpressionPointcut implements ExpressionPointcut, ClassFilte
 		return expression;
 	}
 
+	/*----------------------------------------------------------------------------
+	 *implementation of introductionawaremethodmatcher
+	 *---------------------------------------------------------------------------*/
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
+	public boolean matches(Class<?> targetClass, Method m, boolean hasIntroduction) {
 		checkReadyToMatch();
+		Method targetMethod= ClassUtils.getMostSpecificMethod(m, targetClass);
+		ShadowMatch shadowMatch= getShadowMatch(m, targetMethod);
 		
-		Method targetMethod= ClassUtils.getMostSpecificMethod(method, targetClass);
-		ShadowMatch shadowMatch= getShadowMatch(method, targetMethod);
-		if(shadowMatch.alwaysMatches()) return true;
 		if(shadowMatch.neverMatches()) return false;
+		if(shadowMatch.alwaysMatches()) return true;
+		
+		//maybe match: then if has introduction return true;
+		if(hasIntroduction) return true;
 		
 		return false;
+	}
+	
+	@Override
+	public boolean matches(Method method, Class<?> targetClass) {
+		return matches(targetClass, method, false);
 	}
 
 	@Override

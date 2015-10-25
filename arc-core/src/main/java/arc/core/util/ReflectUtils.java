@@ -3,7 +3,10 @@ package arc.core.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtConstructor;
@@ -136,22 +139,6 @@ public class ReflectUtils {
 		return lva.variableName(i+1);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static <T>Class<? super T>[] getAllInterfaces(Class<T> ifc){
-		
-		List<Class<? super T>> ret= new ArrayList<Class<? super T>>();
-		Class<? super T> ic= ifc;
-		do{
-			ret.add(ic);
-		}while((ic=ic.getSuperclass())!= null);
-		
-		return (Class<? super T>[]) ret.toArray(new Class<?>[0]);
-	}
-	
-	public static String convertResourcePathToClassName(String className){
-		return className.replace("/", ".");
-	}
-	
 	@SuppressWarnings("rawtypes")
 	public static Field findField(String enumType, String fieldName){
 
@@ -163,7 +150,7 @@ public class ReflectUtils {
 				
 				for(Field f: fs){
 					String fn= f.getName();
-					if(fn.equals(fn)){
+					if(fn.equals(fieldName)){
 						return f;
 					}
 				}
