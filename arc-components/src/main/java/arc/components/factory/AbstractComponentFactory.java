@@ -429,6 +429,20 @@ public abstract class AbstractComponentFactory implements ConfigurableComponentF
 		});
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Class<?> getType(final String name){
+		Object component= callInContext(new ContextualCallable(){
+
+			@Override
+			public Object call(InternalContext context) {
+				return getComponent(name, Object.class, context);
+			}
+			
+		});
+		
+		return component== null? null: component.getClass();
+	}
+	
 	/**=================================================
 	 * implementation of {@link DependencyInjector}
 	 *================================================*/

@@ -35,6 +35,9 @@ public class AspectMetadata {
 			throw new IllegalArgumentException("Class '" + clz.getName() + "' is not an @AspectJ aspect");
 		}
 		this.ajType= ajType;
+		if (this.ajType.getDeclarePrecedence().length > 0) {
+			throw new IllegalArgumentException("DeclarePrecendence not presently supported in Spring AOP");
+		}
 		PerClauseKind perClauseKind= ajType.getPerClause().getKind();
 		switch(perClauseKind){
 			case SINGLETON: 

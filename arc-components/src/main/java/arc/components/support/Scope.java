@@ -33,6 +33,10 @@ public enum Scope {
 				public Class<T> getType() {
 					return factory.getType();
 				}
+				@Override
+				public Scope getScope() {
+					return Thread;
+				}
 				
 			};
 		}
@@ -57,6 +61,11 @@ public enum Scope {
 				@Override
 				public Class<T> getType() {
 					return factory.getType();
+				}
+				@Override
+				public Scope getScope() {
+					// TODO Auto-generated method stub
+					return Singleton;
 				}
 				
 			};

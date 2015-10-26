@@ -22,7 +22,7 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 	/*====================================================================
 	 *implementation of ComponentRegistry
 	 *====================================================================*/
-	public <T>void factory(String name, final Class<T> impl, Scope scope){
+	public <T>void factory(String name, final Class<T> impl, final Scope scope){
 		
 		InternalFactory<T> factory= new InternalFactory<T>(){
 
@@ -42,13 +42,18 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 			public Class<T> getType() {
 				return impl;
 			}
+
+			@Override
+			public Scope getScope() {
+				return scope;
+			}
 			
 		};
 		
 		factory(name, factory, scope);
 	}
 	
-	public <T>void factory(String name, final Class<T> impl, final T t, Scope scope){
+	public <T>void factory(String name, final Class<T> impl, final T t, final Scope scope){
 		InternalFactory<T> factory= new InternalFactory<T>(){
 
 			@Override
@@ -59,6 +64,11 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 			@Override
 			public Class<T> getType() {
 				return impl;
+			}
+
+			@Override
+			public Scope getScope() {
+				return scope;
 			}
 			
 		};
@@ -80,6 +90,11 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 			@Override
 			public Class<T> getType() {
 				return impl;
+			}
+
+			@Override
+			public Scope getScope() {
+				return Scope.Singleton;
 			}
 			
 		};
@@ -139,6 +154,22 @@ public final class RegistrableComponentFactory extends AbstractComponentFactory 
 	@Override
 	public <T> boolean containesFactory(String name) {
 		return factories.containsKey(name);
+	}
+
+	@Override
+	public boolean isSingleton(String name) {
+		if(containesFactory(name)){
+			InternalFactory<?> factory= factories.get(name);
+			return factory.getScope()== Scope.Singleton;
+		}
+		
+		return false;
+	}
+
+	@Override
+	public boolean isPrototype(String name) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

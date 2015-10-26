@@ -17,4 +17,5 @@ public interface ComponentFactory {
 	 * @return
 	 */
 	Object getComponent(final String name);
+	
 }

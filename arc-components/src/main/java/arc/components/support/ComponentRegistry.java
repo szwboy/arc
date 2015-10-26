@@ -36,4 +36,25 @@ public interface ComponentRegistry {
 	 * @return
 	 */
 	Set<String> getComponentNames(Class<?> type);
+	
+	/**
+	 * get the bean type
+	 * @param name
+	 * @return
+	 */
+	Class<?> getType(String name);
+	
+	/**
+	 * if the component is singleton
+	 * @param name
+	 * @return
+	 */
+	boolean isSingleton(String name);
+	
+	/**
+	 * if the component is prototype
+	 * @param name
+	 * @return
+	 */
+	boolean isPrototype(String name);
 }
