@@ -7,6 +7,7 @@ import java.util.Set;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 
+import arc.core.util.ClassUtils;
 import arc.core.util.ReflectUtils;
 
 public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata{
@@ -46,8 +47,8 @@ public class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMe
 	public void visitInnerClass(String name, String outerName,String innerName, int access) {
 		
 		if(outerName!= null){
-			String _outerName= ReflectUtils.convertResourcePathToClassName(outerName);
-			String _name= ReflectUtils.convertResourcePathToClassName(name);
+			String _outerName= ClassUtils.convertResourcePathToClassName(outerName);
+			String _name= ClassUtils.convertResourcePathToClassName(name);
 			if(_outerName.equals(this.className)){
 				if(memberClasses== null) memberClasses= new LinkedHashSet<String>();
 				this.memberClasses.add(name);

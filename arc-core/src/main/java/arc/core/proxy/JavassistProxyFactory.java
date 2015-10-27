@@ -1,6 +1,6 @@
 package arc.core.proxy;
 
-import arc.core.util.ReflectUtils;
+import arc.core.util.ClassUtils;
 
 public class JavassistProxyFactory extends ProxyFactorySupport {
 	

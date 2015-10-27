@@ -1,6 +1,6 @@
 package arc.aop.aspectj.annotation;
 
-import arc.components.factory.ComponentFactory;
+import arc.components.factory.RegistrableComponentFactory;
 
 public class AspectInstanceFactoy implements MetadataAwareAspectInstanceFactory {
 
@@ -8,13 +8,13 @@ public class AspectInstanceFactoy implements MetadataAwareAspectInstanceFactory 
 	
 	private ClassLoader classLoader;
 	
-	private ComponentFactory componentFactory;
+	private RegistrableComponentFactory componentFactory;
 	
-	public AspectInstanceFactoy(String aspectName, ComponentFactory componentFactory){
+	public AspectInstanceFactoy(String aspectName, RegistrableComponentFactory componentFactory){
 		this(componentFactory.getType(aspectName), aspectName, componentFactory);
 	}
 	
-	public AspectInstanceFactoy(Class<?> type, String aspectName, ComponentFactory componentFactory){
+	public AspectInstanceFactoy(Class<?> type, String aspectName, RegistrableComponentFactory componentFactory){
 		this.aspectMetadata= new AspectMetadata(type, aspectName);
 		this.componentFactory= componentFactory;
 	}
