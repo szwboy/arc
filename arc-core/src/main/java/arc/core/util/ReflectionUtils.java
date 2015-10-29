@@ -17,7 +17,7 @@ import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
 
-public class ReflectUtils {
+public class ReflectionUtils {
 
 	/**
 	 * for example [[Ljava.lang.String; the result will be java.lang.String[][]
@@ -161,6 +161,15 @@ public class ReflectUtils {
 		}
 		
 		return null;
+	}
+	
+	public static void doWithMethods(Class<?> clazz, MethodCallback methodCallback){
+		
+	}
+	
+	public static interface MethodCallback{
+		
+		void doWith(Method method);
 	}
 	
 }
